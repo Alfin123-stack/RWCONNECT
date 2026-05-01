@@ -1,4 +1,4 @@
-import { cn } from "@/utils";
+import { cn } from "../../utils";
 
 interface SubmitButtonProps {
   isLoading: boolean;
@@ -16,8 +16,7 @@ function LoadingSpinner() {
       className="w-4 h-4 animate-spin"
       viewBox="0 0 24 24"
       fill="none"
-      aria-hidden
-    >
+      aria-hidden>
       <circle
         className="opacity-25"
         cx="12"
@@ -56,8 +55,7 @@ export function SubmitButton({
         "w-full btn-primary justify-center py-3 text-base rounded-xl",
         "disabled:opacity-50 disabled:cursor-not-allowed",
         className,
-      )}
-    >
+      )}>
       {isLoading ? (
         <>
           <LoadingSpinner />

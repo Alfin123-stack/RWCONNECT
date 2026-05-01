@@ -2,10 +2,10 @@
 
 import { ArrowRight, Mail, Shield, User } from "lucide-react";
 import { CheckCircle2 } from "lucide-react";
-import { FormField }           from "@/components/auth/FormField";
-import { PasswordInput }       from "@/components/auth/PasswordInput";
-import { PasswordStrengthBar } from "@/components/auth/PasswordStrengthBar";
-import { cn } from "@/utils";
+import { FormField }           from "../../components/auth/FormField";
+import { PasswordInput }       from "../../components/auth/PasswordInput";
+import { PasswordStrengthBar } from "../../components/auth/PasswordStrengthBar";
+import { cn } from "../../utils";
 
 interface RegisterStep1Props {
   fullName: string;
@@ -60,7 +60,7 @@ export function RegisterStep1({
           value={email}
           onChange={(e) => onChange("email", e.target.value)}
           className={cn("input", errors.email && "border-red-300 focus:ring-red-500")}
-          placeholder="nama@email.com"
+          placeholder="nama../..email.com"
           autoComplete="email"
         />
       </FormField>

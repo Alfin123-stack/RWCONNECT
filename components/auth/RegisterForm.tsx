@@ -1,58 +1,66 @@
 "use client";
 
-import { useState }         from "react";
-import { useRouter }        from "next/navigation";
-import { createClient }     from "@/lib/supabase/client";
-import { useToast }         from "@/hooks/useToast";
-import { isValidEmail, isValidPhone } from "@/utils";
-import { StepIndicator }    from "@/components/auth/StepIndicator";
-import { RegisterStep1 }    from "@/components/auth/RegisterStep1";
-import { RegisterStep2 }    from "@/components/auth/RegisterStep2";
-import { RegisterStep3 }    from "@/components/auth/RegisterStep3";
-import type { Step }        from "@/components/auth/StepIndicator";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "../../lib/supabase/client";
+import { useToast } from "../../hooks/useToast";
+import { isValidEmail, isValidPhone } from "../../utils";
+import { StepIndicator } from "../../components/auth/StepIndicator";
+import { RegisterStep1 } from "../../components/auth/RegisterStep1";
+import { RegisterStep2 } from "../../components/auth/RegisterStep2";
+import { RegisterStep3 } from "../../components/auth/RegisterStep3";
+import type { Step } from "../../components/auth/StepIndicator";
 
 // ── Constants ─────────────────────────────────────────────────
 const STEPS: Step[] = [
   { id: 1, title: "Informasi Akun", desc: "Email & password untuk login" },
-  { id: 2, title: "Data Pribadi",   desc: "Identitas & alamat warga"    },
-  { id: 3, title: "Konfirmasi",     desc: "Periksa data sebelum daftar" },
+  { id: 2, title: "Data Pribadi", desc: "Identitas & alamat warga" },
+  { id: 3, title: "Konfirmasi", desc: "Periksa data sebelum daftar" },
 ];
 
 // ── Types ─────────────────────────────────────────────────────
 interface FormState {
-  full_name:        string;
-  email:            string;
-  password:         string;
+  full_name: string;
+  email: string;
+  password: string;
   confirm_password: string;
-  phone:            string;
-  rt_number:        string;
-  address:          string;
+  phone: string;
+  rt_number: string;
+  address: string;
 }
 
 interface FieldErrors {
-  full_name?:        string;
-  email?:            string;
-  password?:         string;
+  full_name?: string;
+  email?: string;
+  password?: string;
   confirm_password?: string;
-  phone?:            string;
+  phone?: string;
 }
 
 const INITIAL_FORM: FormState = {
-  full_name: "", email: "", password: "", confirm_password: "",
-  phone: "", rt_number: "", address: "",
+  full_name: "",
+  email: "",
+  password: "",
+  confirm_password: "",
+  phone: "",
+  rt_number: "",
+  address: "",
 };
 
 // ── Validators ────────────────────────────────────────────────
 function validateStep1(f: FormState): FieldErrors {
   const e: FieldErrors = {};
-  if (!f.full_name.trim())          e.full_name        = "Nama lengkap wajib diisi";
-  else if (f.full_name.trim().length < 3) e.full_name  = "Nama minimal 3 karakter";
-  if (!f.email.trim())              e.email            = "Email wajib diisi";
-  else if (!isValidEmail(f.email))  e.email            = "Format email tidak valid";
-  if (!f.password)                  e.password         = "Password wajib diisi";
-  else if (f.password.length < 8)   e.password         = "Password minimal 8 karakter";
-  if (!f.confirm_password)          e.confirm_password = "Konfirmasi password wajib diisi";
-  else if (f.password !== f.confirm_password) e.confirm_password = "Password tidak cocok";
+  if (!f.full_name.trim()) e.full_name = "Nama lengkap wajib diisi";
+  else if (f.full_name.trim().length < 3)
+    e.full_name = "Nama minimal 3 karakter";
+  if (!f.email.trim()) e.email = "Email wajib diisi";
+  else if (!isValidEmail(f.email)) e.email = "Format email tidak valid";
+  if (!f.password) e.password = "Password wajib diisi";
+  else if (f.password.length < 8) e.password = "Password minimal 8 karakter";
+  if (!f.confirm_password)
+    e.confirm_password = "Konfirmasi password wajib diisi";
+  else if (f.password !== f.confirm_password)
+    e.confirm_password = "Password tidak cocok";
   return e;
 }
 
@@ -71,14 +79,14 @@ function validateStep2(f: FormState): FieldErrors {
  * dan submit ke Supabase Auth.
  */
 export function RegisterForm() {
-  const router       = useRouter();
+  const router = useRouter();
   const { showToast } = useToast();
 
-  const [step, setStep]         = useState(1);
+  const [step, setStep] = useState(1);
   const [isLoading, setLoading] = useState(false);
-  const [agreed, setAgreed]     = useState(false);
-  const [errors, setErrors]     = useState<FieldErrors>({});
-  const [form, setForm]         = useState<FormState>(INITIAL_FORM);
+  const [agreed, setAgreed] = useState(false);
+  const [errors, setErrors] = useState<FieldErrors>({});
+  const [form, setForm] = useState<FormState>(INITIAL_FORM);
 
   // Generic field setter — clears the field error on change
   const handleChange = (field: string, value: string) => {
@@ -111,7 +119,11 @@ export function RegisterForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!agreed) {
-      showToast("warning", "Setujui syarat & ketentuan", "Centang kotak persetujuan terlebih dahulu.");
+      showToast(
+        "warning",
+        "Setujui syarat & ketentuan",
+        "Centang kotak persetujuan terlebih dahulu.",
+      );
       return;
     }
 
@@ -125,15 +137,16 @@ export function RegisterForm() {
         options: {
           data: {
             full_name: form.full_name,
-            phone:     form.phone     || null,
-            address:   form.address   || null,
+            phone: form.phone || null,
+            address: form.address || null,
             rt_number: form.rt_number || null,
           },
         },
       });
 
       if (signUpError) {
-        const isAlreadyRegistered = signUpError.message.includes("already registered");
+        const isAlreadyRegistered =
+          signUpError.message.includes("already registered");
         showToast(
           "error",
           isAlreadyRegistered ? "Email sudah terdaftar" : "Pendaftaran gagal",
@@ -148,13 +161,13 @@ export function RegisterForm() {
       // upsert ini memastikan field tambahan tersimpan)
       if (data.user) {
         await supabase.from("users").upsert({
-          id:        data.user.id,
-          email:     form.email,
+          id: data.user.id,
+          email: form.email,
           full_name: form.full_name,
-          phone:     form.phone     || null,
-          address:   form.address   || null,
+          phone: form.phone || null,
+          address: form.address || null,
           rt_number: form.rt_number || null,
-          role:      "warga",
+          role: "warga",
         });
       }
 
@@ -166,7 +179,11 @@ export function RegisterForm() {
       );
       router.push("/login");
     } catch {
-      showToast("error", "Terjadi kesalahan", "Silakan coba lagi beberapa saat.");
+      showToast(
+        "error",
+        "Terjadi kesalahan",
+        "Silakan coba lagi beberapa saat.",
+      );
     } finally {
       setLoading(false);
     }

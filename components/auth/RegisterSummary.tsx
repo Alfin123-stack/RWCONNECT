@@ -1,4 +1,12 @@
-import { User, Mail, Shield, Phone, Hash, MapPin, CheckCircle2 } from "lucide-react";
+import {
+  User,
+  Mail,
+  Shield,
+  Phone,
+  Hash,
+  MapPin,
+  CheckCircle2,
+} from "lucide-react";
 
 interface RegisterSummaryProps {
   fullName: string;
@@ -9,12 +17,12 @@ interface RegisterSummaryProps {
 }
 
 const SUMMARY_ITEMS = (data: RegisterSummaryProps) => [
-  { label: "Nama Lengkap", value: data.fullName,  icon: User   },
-  { label: "Email",         value: data.email,    icon: Mail   },
-  { label: "Password",      value: "••••••••",    icon: Shield },
-  { label: "Nomor HP",      value: data.phone    || "—", icon: Phone  },
-  { label: "Nomor RT",      value: data.rtNumber || "—", icon: Hash   },
-  { label: "Alamat",        value: data.address  || "—", icon: MapPin },
+  { label: "Nama Lengkap", value: data.fullName, icon: User },
+  { label: "Email", value: data.email, icon: Mail },
+  { label: "Password", value: "••••••••", icon: Shield },
+  { label: "Nomor HP", value: data.phone || "—", icon: Phone },
+  { label: "Nomor RT", value: data.rtNumber || "—", icon: Hash },
+  { label: "Alamat", value: data.address || "—", icon: MapPin },
 ];
 
 /**
@@ -40,7 +48,9 @@ export function RegisterSummary(props: RegisterSummaryProps) {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs text-slate-400 font-medium">{label}</p>
-              <p className="text-sm text-slate-900 font-semibold truncate">{value}</p>
+              <p className="text-sm text-slate-900 font-semibold truncate">
+                {value}
+              </p>
             </div>
             {hasValue && (
               <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-1" />

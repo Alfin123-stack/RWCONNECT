@@ -1,13 +1,13 @@
 "use client";
 
-import { useState }      from "react";
-import { useRouter }     from "next/navigation";
-import { Mail }          from "lucide-react";
-import { createClient }  from "@/lib/supabase/client";
-import { useToast }      from "@/hooks/useToast";
-import { FormField }     from "@/components/auth/FormField";
-import { PasswordInput } from "@/components/auth/PasswordInput";
-import { SubmitButton }  from "@/components/auth/SubmitButton";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Mail } from "lucide-react";
+import { createClient } from "../../lib/supabase/client";
+import { useToast } from "../../hooks/useToast";
+import { FormField } from "../../components/auth/FormField";
+import { PasswordInput } from "../../components/auth/PasswordInput";
+import { SubmitButton } from "../../components/auth/SubmitButton";
 
 /**
  * LoginForm
@@ -18,7 +18,7 @@ export function LoginForm() {
   const router = useRouter();
   const { showToast } = useToast();
 
-  const [email, setEmail]       = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -32,7 +32,10 @@ export function LoginForm() {
 
     setIsLoading(true);
     const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
     if (error) {
       showToast("error", "Login Gagal", "Email atau password tidak tepat.");
@@ -48,12 +51,7 @@ export function LoginForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-5" noValidate>
       {/* Email */}
-      <FormField
-        id="email"
-        label="Email"
-        icon={Mail}
-        required
-      >
+      <FormField id="email" label="Email" icon={Mail} required>
         <input
           id="email"
           type="email"
@@ -74,12 +72,10 @@ export function LoginForm() {
         labelRight={
           <button
             type="button"
-            className="text-xs text-blue-600 hover:text-blue-800 font-medium transition-colors"
-          >
+            className="text-xs text-blue-600 hover:text-blue-800 font-medium transition-colors">
             Lupa password?
           </button>
-        }
-      >
+        }>
         <PasswordInput
           id="password"
           value={password}

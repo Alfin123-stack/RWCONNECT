@@ -10,14 +10,13 @@ export async function middleware(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name) {
+        get(name: string) {
           return request.cookies.get(name)?.value;
         },
-        set(name, value, options) {
-          // ✅ hanya pakai response
+        set(name: string, value: string, options: any) {
           response.cookies.set({ name, value, ...options });
         },
-        remove(name, options) {
+        remove(name: string, options: any) {
           response.cookies.set({ name, value: "", ...options });
         },
       },
@@ -30,12 +29,10 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  // ✅ Redirect kalau sudah login tapi ke /login
   if (user && pathname === "/login") {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
-  // ✅ Protect dashboard
   if (!user && pathname.startsWith("/dashboard")) {
     return NextResponse.redirect(new URL("/login", request.url));
   }

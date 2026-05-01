@@ -1,8 +1,8 @@
 "use client";
 
 import { ArrowLeft, ArrowRight, Hash, MapPin, Phone } from "lucide-react";
-import { FormField } from "@/components/auth/FormField";
-import { cn } from "@/utils";
+import { FormField } from "../../components/auth/FormField";
+import { cn } from "../../utils";
 
 interface RegisterStep2Props {
   phone: string;
@@ -44,7 +44,10 @@ export function RegisterStep2({
           type="tel"
           value={phone}
           onChange={(e) => onChange("phone", e.target.value)}
-          className={cn("input", errors.phone && "border-red-300 focus:ring-red-500")}
+          className={cn(
+            "input",
+            errors.phone && "border-red-300 focus:ring-red-500",
+          )}
           placeholder="08123456789"
           autoComplete="tel"
         />
@@ -81,15 +84,13 @@ export function RegisterStep2({
           type="button"
           onClick={onBack}
           className="btn-secondary flex-shrink-0 px-4"
-          aria-label="Kembali ke langkah sebelumnya"
-        >
+          aria-label="Kembali ke langkah sebelumnya">
           <ArrowLeft className="w-4 h-4" />
         </button>
         <button
           type="button"
           onClick={onNext}
-          className="btn-primary flex-1 justify-center"
-        >
+          className="btn-primary flex-1 justify-center">
           Lanjut <ArrowRight className="w-4 h-4" />
         </button>
       </div>

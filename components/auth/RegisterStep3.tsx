@@ -1,8 +1,8 @@
 "use client";
 
 import { ArrowLeft, CheckCircle2, Shield } from "lucide-react";
-import { RegisterSummary } from "@/components/auth/RegisterSummary";
-import { SubmitButton }    from "@/components/auth/SubmitButton";
+import { RegisterSummary } from "../../components/auth/RegisterSummary";
+import { SubmitButton } from "../../components/auth/SubmitButton";
 
 interface RegisterStep3Props {
   fullName: string;
@@ -75,8 +75,7 @@ export function RegisterStep3({
           onClick={onBack}
           className="btn-secondary flex-shrink-0 px-4"
           disabled={isLoading}
-          aria-label="Kembali ke langkah sebelumnya"
-        >
+          aria-label="Kembali ke langkah sebelumnya">
           <ArrowLeft className="w-4 h-4" />
         </button>
         <SubmitButton

@@ -1,4 +1,4 @@
-import { cn } from "@/utils";
+import { cn } from "../../utils";
 
 interface FormFieldProps {
   id: string;
@@ -31,11 +31,14 @@ export function FormField({
   return (
     <div>
       {/* Label row */}
-      <div className={cn("flex items-center mb-1.5", labelRight ? "justify-between" : "")}>
+      <div
+        className={cn(
+          "flex items-center mb-1.5",
+          labelRight ? "justify-between" : "",
+        )}>
         <label
           htmlFor={id}
-          className="text-sm font-semibold text-slate-700 flex items-center gap-1.5"
-        >
+          className="text-sm font-semibold text-slate-700 flex items-center gap-1.5">
           {Icon && <Icon className="w-3.5 h-3.5 text-slate-500" />}
           {label}
           {required && <span className="text-red-500 ml-0.5">*</span>}

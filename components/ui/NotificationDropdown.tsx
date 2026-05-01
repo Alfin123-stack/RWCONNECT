@@ -11,7 +11,7 @@ interface NotificationDropdownProps {
 
 export function NotificationDropdown({ onClose }: NotificationDropdownProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -43,7 +43,7 @@ export function NotificationDropdown({ onClose }: NotificationDropdownProps) {
 
   const markAllRead = async () => {
     const supabase = createClient();
-    const ids = notifications.filter((n) => !n.is_read).map((n) => n.id);
+    const ids = notifications.filter((n) => !n?.is_read).map((n) => n?.id);
     if (ids.length === 0) return;
     await supabase
       .from("notifications")

@@ -1,4 +1,4 @@
-import { cn } from "@/utils";
+import { cn } from "../../utils";
 
 // ── Strength calculation (pure function, reusable) ────────────
 export interface PasswordStrength {
@@ -19,14 +19,39 @@ export function getPasswordStrength(password: string): PasswordStrength {
   if (/[^A-Za-z0-9]/.test(password)) score++;
 
   if (score <= 1)
-    return { score, label: "Sangat Lemah", color: "bg-red-500", textColor: "text-red-600" };
+    return {
+      score,
+      label: "Sangat Lemah",
+      color: "bg-red-500",
+      textColor: "text-red-600",
+    };
   if (score === 2)
-    return { score, label: "Lemah", color: "bg-orange-500", textColor: "text-orange-600" };
+    return {
+      score,
+      label: "Lemah",
+      color: "bg-orange-500",
+      textColor: "text-orange-600",
+    };
   if (score === 3)
-    return { score, label: "Sedang", color: "bg-yellow-500", textColor: "text-yellow-600" };
+    return {
+      score,
+      label: "Sedang",
+      color: "bg-yellow-500",
+      textColor: "text-yellow-600",
+    };
   if (score === 4)
-    return { score, label: "Kuat", color: "bg-blue-500", textColor: "text-blue-600" };
-  return { score, label: "Sangat Kuat", color: "bg-emerald-500", textColor: "text-emerald-600" };
+    return {
+      score,
+      label: "Kuat",
+      color: "bg-blue-500",
+      textColor: "text-blue-600",
+    };
+  return {
+    score,
+    label: "Sangat Kuat",
+    color: "bg-emerald-500",
+    textColor: "text-emerald-600",
+  };
 }
 
 // ── Visual component ──────────────────────────────────────────

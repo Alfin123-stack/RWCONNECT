@@ -1,4 +1,4 @@
-import { cn } from "@/utils";
+import { cn } from "../../utils";
 import { AuthBrandPanel } from "./AuthBrandPanel";
 
 interface AuthLayoutProps {
@@ -15,7 +15,11 @@ interface AuthLayoutProps {
  * Wrapper dua kolom: kiri = brand panel, kanan = form/content.
  * Dipakai oleh LoginPage dan RegisterPage.
  */
-export function AuthLayout({ panel, children, rightClassName }: AuthLayoutProps) {
+export function AuthLayout({
+  panel,
+  children,
+  rightClassName,
+}: AuthLayoutProps) {
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
       {/* Left brand panel */}
@@ -26,8 +30,7 @@ export function AuthLayout({ panel, children, rightClassName }: AuthLayoutProps)
         className={cn(
           "flex items-center justify-center p-6 lg:p-12 bg-slate-50 overflow-y-auto",
           rightClassName,
-        )}
-      >
+        )}>
         {children}
       </div>
     </div>

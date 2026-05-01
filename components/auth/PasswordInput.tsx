@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { cn } from "@/utils";
+import { cn } from "../../utils";
 
-interface PasswordInputProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "type"> {
+interface PasswordInputProps extends Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  "type"
+> {
   hasError?: boolean;
   /** Tampilkan ikon match (✓) saat nilai cocok dengan passwordnya */
   showMatchIcon?: boolean;
@@ -44,13 +46,8 @@ export function PasswordInput({
         onClick={() => setVisible((v) => !v)}
         tabIndex={-1}
         aria-label={visible ? "Sembunyikan password" : "Tampilkan password"}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-      >
-        {visible ? (
-          <EyeOff className="w-4 h-4" />
-        ) : (
-          <Eye className="w-4 h-4" />
-        )}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
+        {visible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
       </button>
     </div>
   );
