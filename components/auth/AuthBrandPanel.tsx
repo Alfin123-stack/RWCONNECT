@@ -45,8 +45,7 @@ function AvatarStack() {
             "w-8 h-8 rounded-full border-2 border-slate-800",
             "flex items-center justify-center text-xs font-bold text-white",
             AVATAR_COLORS[i],
-          )}
-        >
+          )}>
           {initial}
         </div>
       ))}
@@ -114,7 +113,9 @@ export function AuthBrandPanel({
               {headingHighlight}
             </span>
           </h1>
-          <p className="text-slate-400 text-lg leading-relaxed">{description}</p>
+          <p className="text-slate-400 text-lg leading-relaxed">
+            {description}
+          </p>
         </div>
 
         {/* Feature list */}
@@ -122,14 +123,12 @@ export function AuthBrandPanel({
           className={cn(
             "grid gap-3",
             showFeatureCheck ? "grid-cols-1" : "grid-cols-2",
-          )}
-        >
+          )}>
           {features.map((f, i) => (
             <div
               key={f.label}
               className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm"
-              style={{ animationDelay: `${i * 80}ms` }}
-            >
+              style={{ animationDelay: `${i * 80}ms` }}>
               <div className="w-8 h-8 rounded-xl bg-blue-500/20 flex items-center justify-center flex-shrink-0">
                 <f.icon className="w-4 h-4 text-blue-400" />
               </div>
@@ -145,12 +144,14 @@ export function AuthBrandPanel({
       </div>
 
       {/* ── Bottom member badge ──────────────────────────────── */}
-      <div className="relative z-10">
-        <div className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/10">
+      <div className="relative mt-4 z-10">
+        <div className="flex mt-4 items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/10">
           <AvatarStack />
           <div>
             <p className="text-sm text-white font-semibold">{memberCount}</p>
-            <p className="text-xs text-slate-400">sudah bergabung di RWConnect</p>
+            <p className="text-xs text-slate-400">
+              sudah bergabung di RWConnect
+            </p>
           </div>
         </div>
       </div>
