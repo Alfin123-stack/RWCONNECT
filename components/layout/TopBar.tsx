@@ -17,18 +17,6 @@ export function TopBar({ user }: TopBarProps) {
   return (
     <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-slate-100 px-4 lg:px-6 xl:px-8 py-3">
       <div className="flex items-center gap-4">
-        {/* Search */}
-        <div className="flex-1 max-w-md hidden md:block">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="search"
-              placeholder="Cari pengumuman, kegiatan..."
-              className="input pl-9 py-2 bg-slate-50 border-slate-100 text-sm"
-            />
-          </div>
-        </div>
-
         <div className="flex-1 md:hidden">
           <div>
             <p className="font-display font-bold text-slate-900 text-base leading-none">
@@ -48,6 +36,7 @@ export function TopBar({ user }: TopBarProps) {
           {/* Notifications */}
           <div className="relative">
             <button
+              title="notifications"
               onClick={() => setShowNotif(!showNotif)}
               className="relative w-9 h-9 rounded-xl bg-slate-50 hover:bg-slate-100 flex items-center justify-center transition-colors">
               <Bell className="w-4 h-4 text-slate-600" />

@@ -130,7 +130,7 @@ export function Sidebar({ user }: SidebarProps) {
       {/* User Profile */}
       <div className="p-3 border-t border-slate-100">
         <Link
-          href="profile"
+          href="/dashboard/profile"
           onClick={() => setOpen(false)}
           className="block mb-2">
           <div className="flex items-center gap-3 px-3 py-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors">
