@@ -41,12 +41,14 @@ Buka [http://localhost:3000](http://localhost:3000)
 
 ```
 src/
-├── actions/                # Server Actions (pengganti API Routes)
-│   ├── announcements.ts    # create, delete, toggle pin
-│   ├── aspirations.ts      # create, upvote, update status, reply
-│   ├── events.ts           # create, delete
-│   ├── notifications.ts    # mark read
-│   └── users.ts            # update profile, update role
+├── actions/                # Server Actions — semua operasi data
+│   ├── announcements.ts    # Read & mutasi pengumuman
+│   ├── aspirations.ts      # Read & mutasi aspirasi
+│   ├── dashboard.ts        # Fetch data dashboard & kalender
+│   ├── events.ts           # Mutasi kegiatan
+│   ├── notifications.ts    # Fetch & mark-read notifikasi
+│   ├── reports.ts          # Fetch data statistik laporan
+│   └── users.ts            # Read & mutasi profil & role warga
 │
 ├── app/                    # Next.js App Router
 │   ├── login/              # Halaman login (CSR)
@@ -62,7 +64,7 @@ src/
 │       └── admin/users/                # Kelola warga (SSR)
 │
 ├── components/
-│   ├── auth/               # 12 komponen auth reusable
+│   ├── auth/               # Komponen auth reusable
 │   ├── layout/             # Sidebar, TopBar
 │   ├── ui/                 # Komponen UI reusable
 │   ├── dashboard/          # Widget dashboard
@@ -99,15 +101,56 @@ src/
 
 ## ⚙️ Server Actions
 
-Semua operasi mutasi data menggunakan **Server Actions** (bukan API Routes). Logika berjalan di server, lebih aman karena tidak mengekspos Supabase key ke browser.
+Semua operasi data menggunakan **Server Actions** — tidak ada API Routes. Logika berjalan di server sehingga Supabase key tidak pernah terekspos ke browser.
 
-| File | Actions |
-|---|---|
-| `actions/announcements.ts` | `createAnnouncementAction`, `deleteAnnouncementAction`, `togglePinAnnouncementAction` |
-| `actions/aspirations.ts` | `createAspirationAction`, `upvoteAspirationAction`, `updateAspirationStatusAction`, `replyAspirationAction` |
-| `actions/events.ts` | `createEventAction`, `deleteEventAction` |
-| `actions/notifications.ts` | `markAllNotificationsReadAction`, `markNotificationReadAction` |
-| `actions/users.ts` | `updateProfileAction`, `updateUserRoleAction` |
+### `announcements.ts`
+| Action | Jenis | Keterangan |
+|---|---|---|
+| `getAnnouncements(options)` | Read | Fetch pengumuman dengan filter & pagination |
+| `getAnnouncementById(id)` | Read | Fetch satu pengumuman by ID |
+| `getAnnouncementTitle(id)` | Read | Fetch judul saja — untuk `generateMetadata` |
+| `incrementViewCount(id)` | Mutasi | Tambah view count, pakai RPC + fallback |
+| `getCurrentUserRole()` | Read | Cek role user yang sedang login |
+| `createAnnouncement(payload)` | Mutasi | Buat pengumuman baru (admin/ketua_rw) |
+
+### `aspirations.ts`
+| Action | Jenis | Keterangan |
+|---|---|---|
+| `getAspirations(options)` | Read | Fetch aspirasi dengan filter & pagination |
+| `createAspiration(payload)` | Mutasi | Kirim aspirasi baru |
+| `upvoteAspiration(id, count)` | Mutasi | Tambah dukungan, pakai RPC + fallback |
+| `updateAspirationStatus(id, status)` | Mutasi | Ubah status (admin/ketua_rw) |
+
+### `dashboard.ts`
+| Action | Jenis | Keterangan |
+|---|---|---|
+| `getDashboardData()` | Read | Stats, pengumuman terbaru, & kegiatan mendatang |
+| `getMonthEvents()` | Read | Fetch kegiatan bulan ini untuk kalender |
+
+### `events.ts`
+| Action | Jenis | Keterangan |
+|---|---|---|
+| `createEventAction(payload)` | Mutasi | Tambah kegiatan baru (admin/ketua_rw) |
+| `deleteEventAction(id)` | Mutasi | Hapus kegiatan (admin/ketua_rw) |
+
+### `notifications.ts`
+| Action | Jenis | Keterangan |
+|---|---|---|
+| `getNotifications()` | Read | Fetch notifikasi user yang login |
+| `markNotificationsRead(ids)` | Mutasi | Tandai notifikasi sudah dibaca |
+
+### `reports.ts`
+| Action | Jenis | Keterangan |
+|---|---|---|
+| `getReportsData()` | Read | Semua statistik platform dalam satu call |
+
+### `users.ts`
+| Action | Jenis | Keterangan |
+|---|---|---|
+| `getCurrentUserProfile()` | Read | Fetch profil user yang sedang login |
+| `updateUserProfile(updates)` | Mutasi | Simpan perubahan profil |
+| `getAllUsers()` | Read | Fetch semua warga (admin/ketua_rw) |
+| `updateUserRole(targetId, role)` | Mutasi | Ubah role warga (admin/ketua_rw) |
 
 ---
 
@@ -125,7 +168,7 @@ Semua operasi mutasi data menggunakan **Server Actions** (bukan API Routes). Log
 Fitur database:
 - **RLS** — Row Level Security aktif di semua tabel
 - **Trigger** `handle_new_user` — profil otomatis dibuat saat register
-- **Trigger** `notify_announcement` — notifikasi otomatis ke semua warga saat pengumuman baru
+- **Trigger** `notify_announcement` — notifikasi otomatis ke semua warga saat ada pengumuman baru
 - **Trigger** `updated_at` — kolom updated_at otomatis diperbarui
 
 ---
