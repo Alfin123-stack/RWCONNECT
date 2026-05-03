@@ -1,8 +1,9 @@
-import { createServerSupabaseClient } from "../../../lib/supabase/server";
+import type { Metadata } from "next";
+import { getAspirations } from "../../../actions/aspirations";
+import { getCurrentUserRole } from "../../../actions/announcements"; // shared helper
+import type { AspirationCategory, AspirationStatus } from "../../../types";
 import { AspirationList } from "../../../components/aspirations/AspirationList";
 import { AspirationFormModal } from "../../../components/aspirations/AspirationFormModal";
-import type { Metadata } from "next";
-import type { AspirationCategory, AspirationStatus } from "../../../types";
 
 export const metadata: Metadata = { title: "Aspirasi & Laporan" };
 
@@ -14,34 +15,20 @@ interface PageProps {
   };
 }
 
-export default async function AsprirationsPage({ searchParams }: PageProps) {
-  const supabase = createServerSupabaseClient();
+export default async function AspirationsPage({ searchParams }: PageProps) {
   const page = parseInt(searchParams.page ?? "1");
   const limit = 10;
-  const from = (page - 1) * limit;
 
-  let query = supabase
-    .from("aspirations")
-    .select("*, author:users(full_name, avatar_url)", { count: "exact" })
-    .order("created_at", { ascending: false })
-    .range(from, from + limit - 1);
-
-  if (searchParams.category)
-    query = query.eq("category", searchParams.category);
-  if (searchParams.status) query = query.eq("status", searchParams.status);
-
-  const { data: aspirations, count } = await query;
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const { data: profile } = await supabase
-    .from("users")
-    .select("role")
-    .eq("id", user?.id ?? "")
-    .single();
-  const isAdmin = profile?.role === "admin" || profile?.role === "ketua_rw";
-  const currentUserId = user?.id ?? "";
+  const [{ items: aspirations, total }, { userId, isAdmin }] =
+    await Promise.all([
+      getAspirations({
+        category: searchParams.category,
+        status: searchParams.status,
+        page,
+        limit,
+      }),
+      getCurrentUserRole(),
+    ]);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -56,12 +43,12 @@ export default async function AsprirationsPage({ searchParams }: PageProps) {
       </div>
 
       <AspirationList
-        aspirations={aspirations ?? []}
-        total={count ?? 0}
+        aspirations={aspirations}
+        total={total}
         page={page}
         limit={limit}
         isAdmin={isAdmin}
-        currentUserId={currentUserId}
+        currentUserId={userId ?? ""}
       />
     </div>
   );

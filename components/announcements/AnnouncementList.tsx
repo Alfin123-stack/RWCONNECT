@@ -41,9 +41,10 @@ export function AnnouncementList({
   return (
     <div className="space-y-4">
       {announcements.map((ann, i) => (
-        <div
+        <Link
           key={ann.id}
-          className="card p-5 hover:shadow-card-hover transition-all duration-300 hover:-translate-y-0.5 animate-slide-up cursor-pointer group"
+          href={`/dashboard/announcements/${ann.id}`}
+          className="card p-5 hover:shadow-card-hover transition-all duration-300 hover:-translate-y-0.5 animate-slide-up cursor-pointer group block"
           style={{ animationDelay: `${i * 50}ms` }}>
           {/* Priority stripe */}
           <div
@@ -64,8 +65,7 @@ export function AnnouncementList({
                       <Pin className="w-2.5 h-2.5" /> Disematkan
                     </span>
                   )}
-                  <span
-                    className={`flex items-center gap-1 text-xs font-medium`}>
+                  <span className="flex items-center gap-1 text-xs font-medium">
                     <span
                       className={`w-1.5 h-1.5 rounded-full ${getPriorityColor(ann.priority)}`}
                     />
@@ -98,7 +98,7 @@ export function AnnouncementList({
               </div>
             </div>
           </div>
-        </div>
+        </Link>
       ))}
 
       <Pagination

@@ -1,13 +1,17 @@
 import { ArrowLeft, Pin, Eye, Clock } from "lucide-react";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { createServerSupabaseClient } from "../../../../lib/supabase/server";
+import {
+  getAnnouncementById,
+  getAnnouncementTitle,
+  incrementViewCount,
+} from "../../../../actions/announcements";
 import {
   formatDateTime,
   getAnnouncementCategoryColor,
   getPriorityColor,
 } from "../../../../utils";
-import { notFound } from "next/navigation";
 
 interface PageProps {
   params: { id: string };
@@ -16,34 +20,25 @@ interface PageProps {
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
-  const supabase = createServerSupabaseClient();
-  const { data } = await supabase
-    .from("announcements")
-    .select("title")
-    .eq("id", params.id)
-    .single();
-  return { title: data?.title ?? "Pengumuman" };
+  const title = await getAnnouncementTitle(params.id);
+  return { title: title ?? "Pengumuman" };
 }
 
 export const revalidate = 60;
 
 export default async function AnnouncementDetailPage({ params }: PageProps) {
-  const supabase = createServerSupabaseClient();
-
-  const { data: ann } = await supabase
-    .from("announcements")
-    .select("*, author:users(full_name, avatar_url)")
-    .eq("id", params.id)
-    .eq("is_published", true)
-    .single();
+  // Fetch content and fire view-count increment in parallel.
+  // incrementViewCount never throws, so it won't block the render.
+  const [ann] = await Promise.all([
+    getAnnouncementById(params.id),
+    incrementViewCount(params.id),
+  ]);
 
   if (!ann) notFound();
 
-  // Increment view count
-  await supabase
-    .from("announcements")
-    .update({ view_count: (ann.view_count ?? 0) + 1 })
-    .eq("id", params.id);
+  // The DB was already incremented above; show the updated value immediately.
+  const displayViewCount = (ann.view_count ?? 0) + 1;
+  const authorName = (ann.author as any)?.full_name ?? "Admin";
 
   return (
     <div className="max-w-2xl animate-fade-in">
@@ -82,15 +77,15 @@ export default async function AnnouncementDetailPage({ params }: PageProps) {
         <div className="flex items-center gap-4 text-xs text-slate-400 mb-6 pb-6 border-b border-slate-100 flex-wrap">
           <span className="flex items-center gap-1.5">
             <div className="w-6 h-6 rounded-lg bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xs">
-              {(ann.author as any)?.full_name?.[0] ?? "A"}
+              {authorName[0]}
             </div>
-            {(ann.author as any)?.full_name ?? "Admin"}
+            {authorName}
           </span>
           <span className="flex items-center gap-1">
             <Clock className="w-3 h-3" /> {formatDateTime(ann.created_at)}
           </span>
           <span className="flex items-center gap-1">
-            <Eye className="w-3 h-3" /> {ann.view_count + 1} dilihat
+            <Eye className="w-3 h-3" /> {displayViewCount} dilihat
           </span>
         </div>
 

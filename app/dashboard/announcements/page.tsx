@@ -1,14 +1,19 @@
 import { Suspense } from "react";
-
 import type { Metadata } from "next";
-import { createServerSupabaseClient } from "../../../lib/supabase/server";
-import { AnnouncementCategory, AnnouncementPriority } from "../../../types";
+import {
+  getAnnouncements,
+  getCurrentUserRole,
+} from "../../../actions/announcements";
+import type {
+  AnnouncementCategory,
+  AnnouncementPriority,
+} from "../../../types";
 import { CreateAnnouncementButton } from "../../../components/announcements/CreateAnnouncementButton";
 import { AnnouncementFilters } from "../../../components/announcements/AnnouncementFilters";
 import { AnnouncementList } from "../../../components/announcements/AnnouncementList";
 
 export const metadata: Metadata = { title: "Pengumuman" };
-export const revalidate = 60; // ISR — revalidate every 60 seconds
+export const revalidate = 60;
 
 interface PageProps {
   searchParams: {
@@ -20,37 +25,20 @@ interface PageProps {
 }
 
 export default async function AnnouncementsPage({ searchParams }: PageProps) {
-  const supabase = createServerSupabaseClient();
   const page = parseInt(searchParams.page ?? "1");
   const limit = 10;
-  const from = (page - 1) * limit;
 
-  let query = supabase
-    .from("announcements")
-    .select("*, author:users(full_name, avatar_url)", { count: "exact" })
-    .eq("is_published", true)
-    .order("is_pinned", { ascending: false })
-    .order("created_at", { ascending: false })
-    .range(from, from + limit - 1);
-
-  if (searchParams.category)
-    query = query.eq("category", searchParams.category);
-  if (searchParams.priority)
-    query = query.eq("priority", searchParams.priority);
-  if (searchParams.search)
-    query = query.ilike("title", `%${searchParams.search}%`);
-
-  const { data: announcements, count } = await query;
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const { data: profile } = await supabase
-    .from("users")
-    .select("role")
-    .eq("id", user?.id ?? "")
-    .single();
-  const isAdmin = profile?.role === "admin" || profile?.role === "ketua_rw";
+  // Both calls run in parallel — no waterfall
+  const [{ items: announcements, total }, { isAdmin }] = await Promise.all([
+    getAnnouncements({
+      category: searchParams.category,
+      priority: searchParams.priority,
+      search: searchParams.search,
+      page,
+      limit,
+    }),
+    getCurrentUserRole(),
+  ]);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -68,8 +56,8 @@ export default async function AnnouncementsPage({ searchParams }: PageProps) {
 
       <Suspense fallback={<AnnouncementListSkeleton />}>
         <AnnouncementList
-          announcements={announcements ?? []}
-          total={count ?? 0}
+          announcements={announcements}
+          total={total}
           page={page}
           limit={limit}
         />

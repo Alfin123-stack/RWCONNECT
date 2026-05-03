@@ -129,22 +129,27 @@ export function Sidebar({ user }: SidebarProps) {
 
       {/* User Profile */}
       <div className="p-3 border-t border-slate-100">
-        <div className="flex items-center gap-3 px-3 py-3 rounded-xl bg-slate-50 mb-2">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center text-blue-700 font-bold text-sm flex-shrink-0">
-            {user.full_name?.[0]?.toUpperCase() ?? "W"}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold text-sm text-slate-900 truncate">
-              {user.full_name}
-            </p>
-            <div className="flex items-center gap-1 mt-0.5">
-              {isAdmin && <Shield className="w-3 h-3 text-blue-600" />}
-              <p className="text-xs text-slate-500 capitalize">
-                {user.role?.replace("_", " ") ?? "Warga"}
+        <Link
+          href="profile"
+          onClick={() => setOpen(false)}
+          className="block mb-2">
+          <div className="flex items-center gap-3 px-3 py-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center text-blue-700 font-bold text-sm flex-shrink-0">
+              {user.full_name?.[0]?.toUpperCase() ?? "W"}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-sm text-slate-900 truncate">
+                {user.full_name}
               </p>
+              <div className="flex items-center gap-1 mt-0.5">
+                {isAdmin && <Shield className="w-3 h-3 text-blue-600" />}
+                <p className="text-xs text-slate-500 capitalize">
+                  {user.role?.replace("_", " ") ?? "Warga"}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
+        </Link>
         <button
           onClick={handleLogout}
           disabled={loggingOut}
@@ -165,6 +170,7 @@ export function Sidebar({ user }: SidebarProps) {
 
       {/* Mobile Toggle */}
       <button
+        title="close"
         onClick={() => setOpen(true)}
         className="lg:hidden fixed bottom-6 right-6 z-40 w-12 h-12 rounded-2xl bg-blue-600 text-white shadow-xl shadow-blue-200 flex items-center justify-center">
         <Menu className="w-5 h-5" />
@@ -179,6 +185,7 @@ export function Sidebar({ user }: SidebarProps) {
           />
           <aside className="lg:hidden fixed inset-y-0 left-0 w-72 bg-white z-50 shadow-2xl flex flex-col animate-slide-in">
             <button
+              title="open"
               onClick={() => setOpen(false)}
               className="absolute top-4 right-4 p-2 rounded-lg hover:bg-slate-100 transition-colors">
               <X className="w-4 h-4 text-slate-500" />

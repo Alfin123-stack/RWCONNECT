@@ -48,6 +48,7 @@ export function CalendarView({ events }: CalendarViewProps) {
         </h2>
         <div className="flex items-center gap-1">
           <button
+            title="buttonLeft"
             onClick={() =>
               setCurrentDate(
                 (d) => new Date(d.getFullYear(), d.getMonth() - 1, 1),
@@ -62,6 +63,7 @@ export function CalendarView({ events }: CalendarViewProps) {
             Hari ini
           </button>
           <button
+            title="buttonRight"
             onClick={() =>
               setCurrentDate(
                 (d) => new Date(d.getFullYear(), d.getMonth() + 1, 1),

@@ -1,8 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Bell, Check, X } from "lucide-react";
-import { createClient } from "../../lib/supabase/client";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { Bell, Check } from "lucide-react";
+import {
+  getNotifications,
+  markNotificationsRead,
+} from "../../actions/notifications";
 import { formatRelativeTime } from "../../utils";
 
 interface NotificationDropdownProps {
@@ -13,7 +16,9 @@ export function NotificationDropdown({ onClose }: NotificationDropdownProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isPending, startTransition] = useTransition();
 
+  // Close on outside click
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) onClose();
@@ -22,42 +27,34 @@ export function NotificationDropdown({ onClose }: NotificationDropdownProps) {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [onClose]);
 
+  // Fetch on mount via Server Action
   useEffect(() => {
-    async function fetchNotifs() {
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data } = await supabase
-        .from("notifications")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(8);
-      setNotifications(data ?? []);
+    startTransition(async () => {
+      const data = await getNotifications();
+      setNotifications(data);
       setLoading(false);
-    }
-    fetchNotifs();
+    });
   }, []);
 
-  const markAllRead = async () => {
-    const supabase = createClient();
-    const ids = notifications.filter((n) => !n?.is_read).map((n) => n?.id);
-    if (ids.length === 0) return;
-    await supabase
-      .from("notifications")
-      .update({ is_read: true })
-      .in("id", ids);
-    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
-  };
-
   const unreadCount = notifications.filter((n) => !n.is_read).length;
+
+  const handleMarkAllRead = () => {
+    const ids = notifications.filter((n) => !n.is_read).map((n) => n.id);
+    if (ids.length === 0) return;
+
+    // Optimistic update first, then persist
+    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+
+    startTransition(async () => {
+      await markNotificationsRead(ids);
+    });
+  };
 
   return (
     <div
       ref={ref}
       className="absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-xl border border-slate-100 z-50 animate-slide-up overflow-hidden">
+      {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-50">
         <div className="flex items-center gap-2">
           <Bell className="w-4 h-4 text-slate-700" />
@@ -72,13 +69,15 @@ export function NotificationDropdown({ onClose }: NotificationDropdownProps) {
         </div>
         {unreadCount > 0 && (
           <button
-            onClick={markAllRead}
-            className="text-xs text-blue-600 font-semibold hover:text-blue-800 flex items-center gap-1">
+            onClick={handleMarkAllRead}
+            disabled={isPending}
+            className="text-xs text-blue-600 font-semibold hover:text-blue-800 flex items-center gap-1 disabled:opacity-50">
             <Check className="w-3 h-3" /> Tandai semua
           </button>
         )}
       </div>
 
+      {/* Body */}
       <div className="max-h-72 overflow-y-auto scrollbar-thin">
         {loading ? (
           <div className="p-6 space-y-3">
@@ -98,7 +97,9 @@ export function NotificationDropdown({ onClose }: NotificationDropdownProps) {
           notifications.map((notif) => (
             <div
               key={notif.id}
-              className={`px-4 py-3 border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition-colors ${!notif.is_read ? "bg-blue-50/30" : ""}`}>
+              className={`px-4 py-3 border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition-colors ${
+                !notif.is_read ? "bg-blue-50/30" : ""
+              }`}>
               <div className="flex items-start gap-2">
                 {!notif.is_read && (
                   <span className="w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0 mt-1.5" />

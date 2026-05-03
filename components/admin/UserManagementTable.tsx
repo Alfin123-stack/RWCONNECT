@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { createClient } from "../../lib/supabase/client";
-import { useToast } from "../../hooks/useToast";
-import { formatDate } from "../../utils";
+import { useState, useTransition } from "react";
 import { Shield, User, Search } from "lucide-react";
+import { useToast } from "../../hooks/useToast";
+import { updateUserRole } from "../../actions/users";
+import { formatDate } from "../../utils";
 import type { User as UserType, UserRole } from "../../types";
 
 interface UserManagementTableProps {
@@ -29,10 +28,11 @@ export function UserManagementTable({
   users,
   currentUserId,
 }: UserManagementTableProps) {
-  const router = useRouter();
   const { showToast } = useToast();
   const [search, setSearch] = useState("");
-  const [updating, setUpdating] = useState<string | null>(null);
+
+  const [pendingId, setPendingId] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   const filtered = users.filter(
     (u) =>
@@ -40,7 +40,7 @@ export function UserManagementTable({
       u.email.toLowerCase().includes(search.toLowerCase()),
   );
 
-  const handleRoleChange = async (userId: string, newRole: UserRole) => {
+  const handleRoleChange = (userId: string, newRole: UserRole) => {
     if (userId === currentUserId) {
       showToast(
         "warning",
@@ -49,21 +49,28 @@ export function UserManagementTable({
       );
       return;
     }
-    setUpdating(userId);
-    try {
-      const supabase = createClient();
-      const { error } = await supabase
-        .from("users")
-        .update({ role: newRole })
-        .eq("id", userId);
-      if (error) throw error;
-      showToast("success", "Role diperbarui", "Role pengguna berhasil diubah.");
-      router.refresh();
-    } catch {
-      showToast("error", "Gagal", "Tidak bisa mengubah role pengguna.");
-    } finally {
-      setUpdating(null);
-    }
+
+    setPendingId(userId);
+
+    startTransition(async () => {
+      const result = await updateUserRole(userId, newRole);
+
+      if (!result.success) {
+        showToast(
+          "error",
+          "Gagal",
+          result.error ?? "Tidak bisa mengubah role pengguna.",
+        );
+      } else {
+        showToast(
+          "success",
+          "Role diperbarui",
+          "Role pengguna berhasil diubah.",
+        );
+      }
+
+      setPendingId(null);
+    });
   };
 
   return (
@@ -99,7 +106,7 @@ export function UserManagementTable({
               <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider hidden lg:table-cell">
                 Bergabung
               </th>
-              <th className="px-5 py-3"></th>
+              <th className="px-5 py-3" />
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">
@@ -142,11 +149,15 @@ export function UserManagementTable({
                 </td>
                 <td className="px-5 py-4">
                   <select
+                    title="role"
                     value={u.role}
                     onChange={(e) =>
                       handleRoleChange(u.id, e.target.value as UserRole)
                     }
-                    disabled={updating === u.id || u.id === currentUserId}
+                    disabled={
+                      (isPending && pendingId === u.id) ||
+                      u.id === currentUserId
+                    }
                     className="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-40 disabled:cursor-not-allowed">
                     {roleOptions.map((r) => (
                       <option key={r.value} value={r.value}>

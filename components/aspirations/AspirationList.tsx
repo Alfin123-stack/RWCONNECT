@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useTransition } from "react";
 import {
   ThumbsUp,
   EyeOff,
@@ -10,8 +9,11 @@ import {
   XCircle,
   Loader2,
 } from "lucide-react";
-import { createClient } from "../../lib/supabase/client";
 import { useToast } from "../../hooks/useToast";
+import {
+  upvoteAspiration,
+  updateAspirationStatus,
+} from "../../actions/aspirations";
 import {
   getStatusColor,
   getStatusLabel,
@@ -43,46 +45,36 @@ export function AspirationList({
   page,
   limit,
   isAdmin,
-  currentUserId,
 }: AspirationListProps) {
   const { showToast } = useToast();
-  const router = useRouter();
-  const [upvoting, setUpvoting] = useState<string | null>(null);
 
-  const handleUpvote = async (id: string, currentCount: number) => {
-    setUpvoting(id);
-    try {
-      const supabase = createClient();
-      const { error } = await supabase
-        .from("aspirations")
-        .update({ upvote_count: currentCount + 1 })
-        .eq("id", id);
-      if (error) throw error;
-      router.refresh();
-    } catch {
-      showToast("error", "Gagal", "Tidak bisa memberikan dukungan saat ini.");
-    } finally {
-      setUpvoting(null);
-    }
+  // Separate transitions so upvote and status change have independent
+  // pending states and don't block each other.
+  const [upvotePending, startUpvote] = useTransition();
+  const [statusPending, startStatusChange] = useTransition();
+
+  const handleUpvote = (id: string, currentCount: number) => {
+    startUpvote(async () => {
+      const result = await upvoteAspiration(id, currentCount);
+      if (!result.success) {
+        showToast("error", "Gagal", "Tidak bisa memberikan dukungan saat ini.");
+      }
+    });
   };
 
-  const handleStatusChange = async (id: string, status: AspirationStatus) => {
-    try {
-      const supabase = createClient();
-      const { error } = await supabase
-        .from("aspirations")
-        .update({ status, updated_at: new Date().toISOString() })
-        .eq("id", id);
-      if (error) throw error;
+  const handleStatusChange = (id: string, status: AspirationStatus) => {
+    startStatusChange(async () => {
+      const result = await updateAspirationStatus(id, status);
+      if (!result.success) {
+        showToast("error", "Gagal", "Tidak bisa mengubah status saat ini.");
+        return;
+      }
       showToast(
         "success",
         "Status diperbarui",
         `Status aspirasi berhasil diubah menjadi "${getStatusLabel(status)}".`,
       );
-      router.refresh();
-    } catch {
-      showToast("error", "Gagal", "Tidak bisa mengubah status saat ini.");
-    }
+    });
   };
 
   if (aspirations.length === 0) {
@@ -136,6 +128,7 @@ export function AspirationList({
                   {/* Admin status change */}
                   {isAdmin && (
                     <select
+                      title="status"
                       value={asp.status}
                       onChange={(e) =>
                         handleStatusChange(
@@ -143,7 +136,8 @@ export function AspirationList({
                           e.target.value as AspirationStatus,
                         )
                       }
-                      className="text-xs border border-slate-200 rounded-lg px-2 py-1 bg-white text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 flex-shrink-0">
+                      disabled={statusPending}
+                      className="text-xs border border-slate-200 rounded-lg px-2 py-1 bg-white text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 flex-shrink-0 disabled:opacity-50">
                       {(
                         [
                           "baru",
@@ -193,10 +187,10 @@ export function AspirationList({
                   </span>
                   <button
                     onClick={() => handleUpvote(asp.id, asp.upvote_count)}
-                    disabled={upvoting === asp.id}
+                    disabled={upvotePending}
                     className="ml-auto flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-blue-600 transition-colors disabled:opacity-50">
                     <ThumbsUp
-                      className={`w-3.5 h-3.5 ${upvoting === asp.id ? "animate-pulse" : ""}`}
+                      className={`w-3.5 h-3.5 ${upvotePending ? "animate-pulse" : ""}`}
                     />
                     {asp.upvote_count} Dukung
                   </button>
