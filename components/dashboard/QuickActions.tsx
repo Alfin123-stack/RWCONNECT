@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { Megaphone, Calendar, MessageSquarePlus, FileText } from "lucide-react";
 import { ROUTES } from "../../constants";

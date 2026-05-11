@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { Megaphone, Pin, ArrowRight } from "lucide-react";
 import { Announcement } from "../../types";
-import { formatRelativeTime, getAnnouncementCategoryColor, truncate } from "../../utils";
+import {
+  formatRelativeTime,
+  getAnnouncementCategoryColor,
+  truncate,
+} from "../../utils";
 import { ROUTES } from "../../constants";
 
 interface RecentAnnouncementsProps {

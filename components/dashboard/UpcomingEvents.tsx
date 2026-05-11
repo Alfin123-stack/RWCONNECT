@@ -1,8 +1,31 @@
 import Link from "next/link";
-import { Calendar, ArrowRight, MapPin } from "lucide-react";
+import {
+  Calendar,
+  ArrowRight,
+  MapPin,
+  Users,
+  Hammer,
+  HeartPulse,
+  Coins,
+  Shield,
+  HandHeart,
+  MoreHorizontal,
+  type LucideIcon,
+} from "lucide-react";
 import { CalendarEvent } from "../../types";
 import { EVENT_CATEGORIES, ROUTES } from "../../constants";
 import { formatEventDate } from "../../utils";
+
+// Mapping icon sesuai EventCategory di types.ts
+const EVENT_CATEGORY_ICONS: Record<string, LucideIcon> = {
+  rapat: Users, // rapat = pertemuan warga
+  kerja_bakti: Hammer, // kerja bakti = kerja fisik
+  posyandu: HeartPulse, // posyandu = kesehatan
+  arisan: Coins, // arisan = keuangan/iuran
+  keamanan: Shield, // keamanan = penjagaan
+  sosial: HandHeart, // sosial = kepedulian
+  lainnya: MoreHorizontal, // lainnya = fallback
+};
 
 interface UpcomingEventsProps {
   events: CalendarEvent[];
@@ -33,15 +56,14 @@ export function UpcomingEvents({ events }: UpcomingEventsProps) {
       ) : (
         <div className="p-3 space-y-2">
           {events.map((event) => {
-            const cat = EVENT_CATEGORIES.find(
-              (c) => c.value === event.category,
-            );
+            const CategoryIcon =
+              EVENT_CATEGORY_ICONS[event.category] ?? Calendar;
             return (
               <div
                 key={event.id}
                 className="flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group">
-                <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0 text-lg">
-                  {cat?.icon ?? "📌"}
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                  <CategoryIcon className="w-5 h-5 text-emerald-600" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-sm text-slate-900 group-hover:text-emerald-700 transition-colors line-clamp-1">

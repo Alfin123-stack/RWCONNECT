@@ -1,7 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Users,
+  Hammer,
+  HeartPulse,
+  Coins,
+  Shield,
+  HandHeart,
+  MoreHorizontal,
+  MapPin,
+  type LucideIcon,
+} from "lucide-react";
 import {
   format,
   startOfMonth,
@@ -17,6 +29,19 @@ import { id } from "date-fns/locale";
 import { cn } from "../../utils";
 import { EVENT_CATEGORIES } from "../../constants";
 import type { CalendarEvent } from "../../types";
+
+const EVENT_CATEGORY_CONFIG: Record<
+  string,
+  { icon: LucideIcon; bg: string; color: string }
+> = {
+  rapat: { icon: Users, bg: "bg-blue-50", color: "text-blue-600" },
+  kerja_bakti: { icon: Hammer, bg: "bg-amber-50", color: "text-amber-600" },
+  posyandu: { icon: HeartPulse, bg: "bg-rose-50", color: "text-rose-600" },
+  arisan: { icon: Coins, bg: "bg-yellow-50", color: "text-yellow-600" },
+  keamanan: { icon: Shield, bg: "bg-orange-50", color: "text-orange-600" },
+  sosial: { icon: HandHeart, bg: "bg-purple-50", color: "text-purple-600" },
+  lainnya: { icon: MoreHorizontal, bg: "bg-slate-50", color: "text-slate-500" },
+};
 
 interface CalendarViewProps {
   events: CalendarEvent[];
@@ -48,7 +73,7 @@ export function CalendarView({ events }: CalendarViewProps) {
         </h2>
         <div className="flex items-center gap-1">
           <button
-            title="buttonLeft"
+            title="Bulan sebelumnya"
             onClick={() =>
               setCurrentDate(
                 (d) => new Date(d.getFullYear(), d.getMonth() - 1, 1),
@@ -63,7 +88,7 @@ export function CalendarView({ events }: CalendarViewProps) {
             Hari ini
           </button>
           <button
-            title="buttonRight"
+            title="Bulan berikutnya"
             onClick={() =>
               setCurrentDate(
                 (d) => new Date(d.getFullYear(), d.getMonth() + 1, 1),
@@ -122,15 +147,21 @@ export function CalendarView({ events }: CalendarViewProps) {
                 </span>
                 {dayEvents.length > 0 && (
                   <div className="flex gap-0.5 mt-1 flex-wrap justify-center">
-                    {dayEvents.slice(0, 3).map((e, i) => (
-                      <span
-                        key={i}
-                        className={cn(
-                          "w-1.5 h-1.5 rounded-full",
-                          isSelected ? "bg-white/70" : "bg-blue-500",
-                        )}
-                      />
-                    ))}
+                    {dayEvents.slice(0, 3).map((e, i) => {
+                      const cfg = EVENT_CATEGORY_CONFIG[e.category];
+                      return (
+                        <span
+                          key={i}
+                          className={cn(
+                            "w-1.5 h-1.5 rounded-full",
+                            isSelected
+                              ? "bg-white/70"
+                              : (cfg?.color.replace("text-", "bg-") ??
+                                  "bg-blue-500"),
+                          )}
+                        />
+                      );
+                    })}
                   </div>
                 )}
               </button>
@@ -152,21 +183,31 @@ export function CalendarView({ events }: CalendarViewProps) {
           ) : (
             <div className="space-y-2">
               {selectedDayEvents.map((event) => {
+                const cfg =
+                  EVENT_CATEGORY_CONFIG[event.category] ??
+                  EVENT_CATEGORY_CONFIG.lainnya;
+                const CategoryIcon = cfg.icon;
                 const cat = EVENT_CATEGORIES.find(
                   (c) => c.value === event.category,
                 );
                 return (
                   <div
                     key={event.id}
-                    className="flex items-center gap-3 p-3 rounded-xl bg-blue-50 border border-blue-100">
-                    <span className="text-lg">{cat?.icon ?? "📌"}</span>
-                    <div>
-                      <p className="font-semibold text-sm text-slate-900">
+                    className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
+                    <div
+                      className={`w-9 h-9 rounded-lg ${cfg.bg} flex items-center justify-center flex-shrink-0`}>
+                      <CategoryIcon className={`w-4 h-4 ${cfg.color}`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm text-slate-900 line-clamp-1">
                         {event.title}
                       </p>
+                      <p className={`text-xs font-medium mt-0.5 ${cfg.color}`}>
+                        {cat?.label ?? event.category}
+                      </p>
                       {event.location && (
-                        <p className="text-xs text-slate-500">
-                          📍 {event.location}
+                        <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
+                          <MapPin className="w-3 h-3" /> {event.location}
                         </p>
                       )}
                     </div>

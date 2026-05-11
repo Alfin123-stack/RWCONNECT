@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import type { Metadata } from "next";
 import {
   getAnnouncements,
@@ -8,6 +7,7 @@ import type {
   AnnouncementCategory,
   AnnouncementPriority,
 } from "../../../types";
+import { AnnouncementProvider } from "../../../contexts/AnnouncementContext";
 import { CreateAnnouncementButton } from "../../../components/announcements/CreateAnnouncementButton";
 import { AnnouncementFilters } from "../../../components/announcements/AnnouncementFilters";
 import { AnnouncementList } from "../../../components/announcements/AnnouncementList";
@@ -28,7 +28,6 @@ export default async function AnnouncementsPage({ searchParams }: PageProps) {
   const page = parseInt(searchParams.page ?? "1");
   const limit = 10;
 
-  // Both calls run in parallel — no waterfall
   const [{ items: announcements, total }, { isAdmin }] = await Promise.all([
     getAnnouncements({
       category: searchParams.category,
@@ -41,41 +40,27 @@ export default async function AnnouncementsPage({ searchParams }: PageProps) {
   ]);
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="section-title">Pengumuman</h1>
-          <p className="section-subtitle">
-            Informasi terkini untuk warga lingkungan RW
-          </p>
+    <AnnouncementProvider initialAnnouncements={announcements}>
+      <div className="space-y-6 animate-fade-in">
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <h1 className="section-title">Pengumuman</h1>
+            <p className="section-subtitle">
+              Informasi terkini untuk warga lingkungan RW
+            </p>
+          </div>
+          {isAdmin && <CreateAnnouncementButton />}
         </div>
-        {isAdmin && <CreateAnnouncementButton />}
-      </div>
 
-      <AnnouncementFilters currentFilters={searchParams} />
+        <AnnouncementFilters currentFilters={searchParams} />
 
-      <Suspense fallback={<AnnouncementListSkeleton />}>
         <AnnouncementList
-          announcements={announcements}
           total={total}
           page={page}
           limit={limit}
+          isAdmin={isAdmin}
         />
-      </Suspense>
-    </div>
-  );
-}
-
-function AnnouncementListSkeleton() {
-  return (
-    <div className="space-y-4">
-      {[...Array(4)].map((_, i) => (
-        <div key={i} className="card p-5 space-y-3">
-          <div className="skeleton h-5 w-3/4" />
-          <div className="skeleton h-4 w-full" />
-          <div className="skeleton h-4 w-1/2" />
-        </div>
-      ))}
-    </div>
+      </div>
+    </AnnouncementProvider>
   );
 }

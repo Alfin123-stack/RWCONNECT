@@ -2,14 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import { createServerSupabaseClient } from "../lib/supabase/server";
+import { CreateAnnouncementSchema } from "../lib/validations/announcements";
 import type {
   Announcement,
   AnnouncementCategory,
   AnnouncementPriority,
   CreateAnnouncementPayload,
 } from "../types";
-
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface GetAnnouncementsOptions {
   category?: AnnouncementCategory;
@@ -28,13 +27,9 @@ export interface ActionResult<T = void> {
   success: boolean;
   data?: T;
   error?: string;
+  fieldErrors?: Record<string, string>;
 }
 
-// ─── Read ─────────────────────────────────────────────────────────────────────
-
-/**
- * Fetch paginated, filtered announcements.
- */
 export async function getAnnouncements(
   options: GetAnnouncementsOptions = {},
 ): Promise<GetAnnouncementsResult> {
@@ -55,16 +50,11 @@ export async function getAnnouncements(
   if (search) query = query.ilike("title", `%${search}%`);
 
   const { data, count, error } = await query;
-
   if (error) throw new Error(error.message);
 
   return { items: data ?? [], total: count ?? 0 };
 }
 
-/**
- * Fetch a single published announcement by ID.
- * Returns null when not found so the caller can trigger notFound().
- */
 export async function getAnnouncementById(id: string) {
   const supabase = createServerSupabaseClient();
 
@@ -79,9 +69,6 @@ export async function getAnnouncementById(id: string) {
   return data;
 }
 
-/**
- * Fetch only the title — lightweight call for generateMetadata.
- */
 export async function getAnnouncementTitle(id: string): Promise<string | null> {
   const supabase = createServerSupabaseClient();
 
@@ -94,12 +81,6 @@ export async function getAnnouncementTitle(id: string): Promise<string | null> {
   return data?.title ?? null;
 }
 
-/**
- * Increment view_count by 1.
- * Uses a Postgres RPC to avoid read-then-write race conditions.
- * Falls back to manual increment if the RPC doesn't exist yet.
- * Errors are swallowed — a failing counter must never break the page.
- */
 export async function incrementViewCount(id: string): Promise<void> {
   const supabase = createServerSupabaseClient();
 
@@ -108,7 +89,6 @@ export async function incrementViewCount(id: string): Promise<void> {
   });
 
   if (rpcError) {
-    // Fallback: read then write
     const { data } = await supabase
       .from("announcements")
       .select("view_count")
@@ -120,11 +100,11 @@ export async function incrementViewCount(id: string): Promise<void> {
       .update({ view_count: (data?.view_count ?? 0) + 1 })
       .eq("id", id);
   }
+
+  // ✅ Revalidate list agar view count update saat balik ke list
+  revalidatePath("/dashboard/announcements");
 }
 
-/**
- * Get current user + whether they have admin/ketua_rw role.
- */
 export async function getCurrentUserRole(): Promise<{
   userId: string | null;
   isAdmin: boolean;
@@ -134,7 +114,6 @@ export async function getCurrentUserRole(): Promise<{
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
   if (!user) return { userId: null, isAdmin: false };
 
   const { data: profile } = await supabase
@@ -144,11 +123,8 @@ export async function getCurrentUserRole(): Promise<{
     .single();
 
   const isAdmin = profile?.role === "admin" || profile?.role === "ketua_rw";
-
   return { userId: user.id, isAdmin };
 }
-
-// ─── Mutations ────────────────────────────────────────────────────────────────
 
 export async function createAnnouncement(
   payload: CreateAnnouncementPayload,
@@ -158,7 +134,6 @@ export async function createAnnouncement(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
   if (!user) return { success: false, error: "Unauthorized" };
 
   const { data: profile } = await supabase
@@ -171,14 +146,24 @@ export async function createAnnouncement(
     return { success: false, error: "Forbidden" };
   }
 
-  if (!payload.title?.trim() || !payload.content?.trim()) {
-    return { success: false, error: "Judul dan isi pengumuman wajib diisi." };
+  const parsed = CreateAnnouncementSchema.safeParse(payload);
+  if (!parsed.success) {
+    const fieldErrors: Record<string, string> = {};
+    const flat = parsed.error.flatten().fieldErrors as Record<
+      string,
+      string[] | undefined
+    >;
+    for (const field in flat) {
+      const messages = flat[field];
+      if (messages && messages.length > 0) fieldErrors[field] = messages[0];
+    }
+    return { success: false, fieldErrors };
   }
 
   const { data, error } = await supabase
     .from("announcements")
     .insert({
-      ...payload,
+      ...parsed.data,
       author_id: user.id,
       is_published: true,
       view_count: 0,
@@ -188,7 +173,71 @@ export async function createAnnouncement(
 
   if (error) return { success: false, error: error.message };
 
-  revalidatePath("/announcements");
+  // ✅ Path yang benar
+  revalidatePath("/dashboard/announcements");
+
+  return { success: true, data };
+}
+
+export async function deleteAnnouncement(id: string): Promise<ActionResult> {
+  const supabase = createServerSupabaseClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: "Unauthorized" };
+
+  const { data: profile } = await supabase
+    .from("users")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile || !["admin", "ketua_rw"].includes(profile.role)) {
+    return { success: false, error: "Forbidden" };
+  }
+
+  const { error } = await supabase.from("announcements").delete().eq("id", id);
+  if (error) return { success: false, error: error.message };
+
+  // ✅ Path yang benar
+  revalidatePath("/dashboard/announcements");
+
+  return { success: true };
+}
+
+export async function toggleAnnouncementPin(
+  id: string,
+  currentPinned: boolean,
+): Promise<ActionResult<Announcement>> {
+  const supabase = createServerSupabaseClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: "Unauthorized" };
+
+  const { data: profile } = await supabase
+    .from("users")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile || !["admin", "ketua_rw"].includes(profile.role)) {
+    return { success: false, error: "Forbidden" };
+  }
+
+  const { data, error } = await supabase
+    .from("announcements")
+    .update({ is_pinned: !currentPinned })
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error || !data) return { success: false, error: error?.message };
+
+  // ✅ Path yang benar
+  revalidatePath("/dashboard/announcements");
 
   return { success: true, data };
 }

@@ -1,4 +1,13 @@
-import { ArrowLeft, Pin, Eye, Clock } from "lucide-react";
+import {
+  ArrowLeft,
+  Pin,
+  Eye,
+  Clock,
+  Tag,
+  CalendarDays,
+  CalendarClock,
+  User,
+} from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -26,9 +35,34 @@ export async function generateMetadata({
 
 export const revalidate = 60;
 
+const priorityAccent: Record<string, string> = {
+  tinggi: "bg-rose-500",
+  high: "bg-rose-500",
+  sedang: "bg-amber-400",
+  medium: "bg-amber-400",
+  rendah: "bg-emerald-500",
+  low: "bg-emerald-500",
+};
+
+const priorityLabel: Record<string, string> = {
+  tinggi: "Tinggi",
+  high: "Tinggi",
+  sedang: "Sedang",
+  medium: "Sedang",
+  rendah: "Rendah",
+  low: "Rendah",
+};
+
+const priorityDot: Record<string, string> = {
+  tinggi: "bg-rose-500",
+  high: "bg-rose-500",
+  sedang: "bg-amber-500",
+  medium: "bg-amber-500",
+  rendah: "bg-emerald-500",
+  low: "bg-emerald-500",
+};
+
 export default async function AnnouncementDetailPage({ params }: PageProps) {
-  // Fetch content and fire view-count increment in parallel.
-  // incrementViewCount never throws, so it won't block the render.
   const [ann] = await Promise.all([
     getAnnouncementById(params.id),
     incrementViewCount(params.id),
@@ -36,57 +70,105 @@ export default async function AnnouncementDetailPage({ params }: PageProps) {
 
   if (!ann) notFound();
 
-  // The DB was already incremented above; show the updated value immediately.
   const displayViewCount = (ann.view_count ?? 0) + 1;
   const authorName = (ann.author as any)?.full_name ?? "Admin";
+  const authorInitial = authorName[0].toUpperCase();
+
+  const priorityKey = ann.priority?.toLowerCase() ?? "rendah";
+  const accentBar = priorityAccent[priorityKey] ?? "bg-slate-300";
+  const dotColor = priorityDot[priorityKey] ?? "bg-slate-400";
+  const prioLabel = priorityLabel[priorityKey] ?? ann.priority;
 
   return (
-    <div className="max-w-2xl animate-fade-in">
+    <div className="max-w-2xl animate-fade-in mx-auto space-y-5">
+      {/* Back */}
       <Link
         href="/dashboard/announcements"
-        className="btn-ghost mb-6 -ml-2 inline-flex">
-        <ArrowLeft className="w-4 h-4" /> Kembali ke Pengumuman
+        className="btn-ghost mb-6 -ml-2 inline-flex group gap-1.5 items-center text-sm text-slate-500 hover:text-slate-800 transition-colors">
+        <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
+        Kembali ke Pengumuman
       </Link>
 
-      <div className="card p-6 lg:p-8">
+      {/* Priority accent bar */}
+      <div className={`h-1 w-full rounded-t-2xl ${accentBar}`} />
+
+      {/* Main card */}
+      <div className="card rounded-t-none border-t-0 p-6 lg:p-8 shadow-sm space-y-5">
         {/* Badges */}
-        <div className="flex items-center gap-2 flex-wrap mb-4">
+        <div className="flex items-center gap-2 flex-wrap">
           <span
-            className={`badge ${getAnnouncementCategoryColor(ann.category)}`}>
+            className={`badge text-xs flex items-center gap-1 ${getAnnouncementCategoryColor(ann.category)}`}>
+            <Tag className="w-2.5 h-2.5" />
             {ann.category}
           </span>
+
           {ann.is_pinned && (
-            <span className="flex items-center gap-1 badge bg-amber-50 text-amber-700 border-amber-200">
-              <Pin className="w-2.5 h-2.5" /> Disematkan
+            <span className="badge bg-amber-50 text-amber-700 border border-amber-200 text-xs flex items-center gap-1">
+              <Pin className="w-2.5 h-2.5" />
+              Disematkan
             </span>
           )}
-          <span className="flex items-center gap-1.5 text-xs text-slate-500">
+
+          {/* Priority pill — pushed right */}
+          <span className="ml-auto flex items-center gap-1.5 text-xs font-semibold text-slate-500 bg-slate-50 border border-slate-100 rounded-full px-2.5 py-1">
             <span
-              className={`w-2 h-2 rounded-full ${getPriorityColor(ann.priority)}`}
+              className={`w-2 h-2 rounded-full ${dotColor} flex-shrink-0`}
             />
-            Prioritas {ann.priority}
+            Prioritas {prioLabel}
           </span>
         </div>
 
         {/* Title */}
-        <h1 className="text-2xl lg:text-3xl font-display font-bold text-slate-900 mb-4 leading-tight">
+        <h1 className="font-display font-bold text-slate-900 text-2xl lg:text-3xl leading-snug">
           {ann.title}
         </h1>
 
-        {/* Meta */}
-        <div className="flex items-center gap-4 text-xs text-slate-400 mb-6 pb-6 border-b border-slate-100 flex-wrap">
-          <span className="flex items-center gap-1.5">
-            <div className="w-6 h-6 rounded-lg bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xs">
-              {authorName[0]}
+        {/* Meta strip */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pb-5 border-b border-slate-100">
+          {/* Author */}
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm flex-shrink-0 ring-1 ring-blue-200">
+              {authorInitial}
             </div>
-            {authorName}
-          </span>
-          <span className="flex items-center gap-1">
-            <Clock className="w-3 h-3" /> {formatDateTime(ann.created_at)}
-          </span>
-          <span className="flex items-center gap-1">
-            <Eye className="w-3 h-3" /> {displayViewCount} dilihat
-          </span>
+            <div className="min-w-0">
+              <p className="text-[10px] text-slate-400 uppercase tracking-wide font-medium">
+                Penulis
+              </p>
+              <p className="text-xs text-slate-700 font-semibold truncate">
+                {authorName}
+              </p>
+            </div>
+          </div>
+
+          {/* Published date */}
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center flex-shrink-0">
+              <Clock className="w-4 h-4 text-slate-500" />
+            </div>
+            <div>
+              <p className="text-[10px] text-slate-400 uppercase tracking-wide font-medium">
+                Diterbitkan
+              </p>
+              <p className="text-xs text-slate-700 font-semibold">
+                {formatDateTime(ann.created_at)}
+              </p>
+            </div>
+          </div>
+
+          {/* View count */}
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center flex-shrink-0">
+              <Eye className="w-4 h-4 text-slate-500" />
+            </div>
+            <div>
+              <p className="text-[10px] text-slate-400 uppercase tracking-wide font-medium">
+                Dilihat
+              </p>
+              <p className="text-xs text-slate-700 font-semibold">
+                {displayViewCount.toLocaleString("id-ID")}×
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Content */}
@@ -94,14 +176,29 @@ export default async function AnnouncementDetailPage({ params }: PageProps) {
           {ann.content}
         </div>
 
+        {/* Expiry notice */}
         {ann.expires_at && (
-          <div className="mt-6 p-3 rounded-xl bg-amber-50 border border-amber-100">
-            <p className="text-xs text-amber-700 font-medium">
-              ⏰ Pengumuman ini berlaku hingga {formatDateTime(ann.expires_at)}
-            </p>
+          <div className="flex gap-3 p-4 rounded-2xl bg-amber-50 border border-amber-100">
+            <CalendarClock className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
+            <div className="space-y-0.5">
+              <p className="text-xs font-semibold text-amber-700">
+                Batas Berlaku
+              </p>
+              <p className="text-sm text-amber-600 leading-relaxed">
+                Pengumuman ini berlaku hingga{" "}
+                <span className="font-bold">
+                  {formatDateTime(ann.expires_at)}
+                </span>
+              </p>
+            </div>
           </div>
         )}
       </div>
+
+      {/* Footer ID hint */}
+      <p className="text-center text-xs text-slate-300 mt-4">
+        ID pengumuman: <span className="font-mono">{params.id}</span>
+      </p>
     </div>
   );
 }
