@@ -28,18 +28,19 @@ export function AdminResponseForm({
   const [text, setText] = useState(currentResponse ?? "");
   const [error, setError] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const hasResponse = !!currentResponse;
   const charLeft = 1000 - text.length;
   const isEditing = isOpen;
 
-  // Sync text saat currentResponse berubah (setelah revalidate)
+  // Sync text ketika response berubah
   useEffect(() => {
     setText(currentResponse ?? "");
   }, [currentResponse]);
 
-  // Auto-focus textarea saat form terbuka
+  // Auto focus textarea
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => textareaRef.current?.focus(), 80);
@@ -64,6 +65,7 @@ export function AdminResponseForm({
       setError("Respon tidak boleh kosong");
       return;
     }
+
     if (text.trim().length > 1000) {
       setError("Respon maksimal 1000 karakter");
       return;
@@ -74,6 +76,7 @@ export function AdminResponseForm({
 
     // Optimistic update
     optimisticUpdateResponse?.(aspirationId, text.trim());
+
     handleClose();
 
     const result = await respondAspiration(aspirationId, text.trim());
@@ -81,14 +84,17 @@ export function AdminResponseForm({
     setIsPending(false);
 
     if (!result.success) {
-      // Rollback
+      // rollback
       optimisticUpdateResponse?.(aspirationId, currentResponse ?? null);
+
       setError(
         result.error ??
           result.fieldErrors?.admin_response ??
           "Gagal menyimpan respon.",
       );
+
       setIsOpen(true);
+
       showToast(
         "error",
         "Gagal",
@@ -114,142 +120,322 @@ export function AdminResponseForm({
 
     if (!result.success) {
       optimisticUpdateResponse?.(aspirationId, currentResponse ?? null);
+
       showToast("error", "Gagal", "Tidak bisa menghapus respon saat ini.");
     } else {
       setText("");
+
       showToast("success", "Respon dihapus", "Respon berhasil dihapus.");
     }
   };
 
   return (
-    <div className="mt-3">
-      {/* Tampilan respon yang sudah ada */}
+    <div className="mt-3 w-full min-w-0">
+      {/* ================= RESPONSE VIEW ================= */}
       {hasResponse && !isEditing && (
-        <div className="p-3 rounded-xl bg-blue-50 border border-blue-100">
-          <div className="flex items-center justify-between mb-1.5">
-            <p className="text-xs font-semibold text-blue-700 flex items-center gap-1.5">
-              <MessageSquareReply className="w-3 h-3" />
-              Respon Pengurus:
-            </p>
-            <div className="flex items-center gap-1">
+        <div
+          className="
+            w-full min-w-0
+            rounded-2xl
+            border border-blue-100
+            bg-blue-50
+            p-3 sm:p-4
+            shadow-sm
+          ">
+          {/* Header */}
+          <div
+            className="
+              flex flex-col gap-2
+              xs:flex-row xs:items-start xs:justify-between
+            ">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <MessageSquareReply className="w-3.5 h-3.5 shrink-0 text-blue-700" />
+
+              <p
+                className="
+                  text-[11px] sm:text-xs
+                  font-semibold
+                  text-blue-700
+                  truncate
+                ">
+                Respon Pengurus
+              </p>
+            </div>
+
+            <div className="flex items-center gap-1 shrink-0">
               <button
                 onClick={handleOpen}
                 title="Edit respon"
-                className="p-1 rounded-lg text-blue-400 hover:text-blue-600 hover:bg-blue-100 transition-colors">
-                <Pencil className="w-3 h-3" />
+                className="
+                  flex items-center justify-center
+                  h-8 w-8
+                  rounded-lg
+                  text-blue-500
+                  hover:text-blue-700
+                  hover:bg-blue-100
+                  active:scale-95
+                  transition-all
+                ">
+                <Pencil className="w-3.5 h-3.5" />
               </button>
+
               <button
                 onClick={handleDelete}
                 disabled={isDeleting}
                 title="Hapus respon"
-                className="p-1 rounded-lg text-blue-400 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50">
-                <Trash2 className="w-3 h-3" />
+                className="
+                  flex items-center justify-center
+                  h-8 w-8
+                  rounded-lg
+                  text-blue-500
+                  hover:text-red-500
+                  hover:bg-red-50
+                  disabled:opacity-50
+                  active:scale-95
+                  transition-all
+                ">
+                <Trash2 className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
-          <p className="text-xs text-blue-700 leading-relaxed">
-            {currentResponse}
-          </p>
-          {currentResponseAt && (
-            <p className="text-[10px] text-blue-400 mt-1.5">
-              {new Date(currentResponseAt).toLocaleDateString("id-ID", {
-                day: "numeric",
-                month: "short",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
+
+          {/* Content */}
+          <div className="mt-2">
+            <p
+              className="
+                break-words
+                whitespace-pre-wrap
+                text-[11px] sm:text-xs
+                leading-relaxed
+                text-blue-800
+              ">
+              {currentResponse}
             </p>
-          )}
+
+            {currentResponseAt && (
+              <p
+                className="
+                  mt-2
+                  text-[10px]
+                  text-blue-500
+                ">
+                {new Date(currentResponseAt).toLocaleDateString("id-ID", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </p>
+            )}
+          </div>
         </div>
       )}
 
-      {/* Tombol buka form jika belum ada respon */}
+      {/* ================= OPEN BUTTON ================= */}
       {!hasResponse && !isEditing && (
         <button
           onClick={handleOpen}
-          className="flex items-center gap-1.5 text-xs text-blue-500 hover:text-blue-700
-                     font-medium transition-colors px-2 py-1 rounded-lg hover:bg-blue-50">
-          <MessageSquareReply className="w-3.5 h-3.5" />
-          Balas aspirasi ini
+          className="
+            inline-flex items-center gap-1.5
+            rounded-xl
+            px-3 py-2
+            text-[11px] sm:text-xs
+            font-medium
+            text-blue-600
+            hover:bg-blue-50
+            hover:text-blue-700
+            active:scale-[0.98]
+            transition-all
+          ">
+          <MessageSquareReply className="w-3.5 h-3.5 shrink-0" />
+
+          <span className="truncate">Balas aspirasi ini</span>
         </button>
       )}
 
-      {/* Form respon */}
+      {/* ================= FORM ================= */}
       {isEditing && (
         <form
           onSubmit={handleSubmit}
-          className="rounded-xl border border-blue-200 bg-blue-50 overflow-hidden animate-slide-up">
-          <div className="flex items-center justify-between px-3 pt-3 pb-2">
-            <p className="text-xs font-semibold text-blue-700 flex items-center gap-1.5">
-              <MessageSquareReply className="w-3.5 h-3.5" />
-              {hasResponse ? "Edit Respon Pengurus" : "Tulis Respon Pengurus"}
-            </p>
+          className="
+            w-full min-w-0
+            overflow-hidden
+            rounded-2xl
+            border border-blue-200
+            bg-blue-50
+            shadow-sm
+            animate-slide-up
+          ">
+          {/* Header */}
+          <div
+            className="
+              flex items-start justify-between gap-2
+              px-3 sm:px-4
+              pt-3
+              pb-2
+            ">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <MessageSquareReply className="w-3.5 h-3.5 shrink-0 text-blue-700" />
+
+              <p
+                className="
+                  text-[11px] sm:text-xs
+                  font-semibold
+                  text-blue-700
+                  break-words
+                ">
+                {hasResponse ? "Edit Respon Pengurus" : "Tulis Respon Pengurus"}
+              </p>
+            </div>
+
             <button
-              title="close"
               type="button"
+              title="Close"
               onClick={handleClose}
-              className="p-1 rounded-lg text-blue-400 hover:text-blue-600 hover:bg-blue-100 transition-colors">
+              className="
+                flex items-center justify-center
+                h-8 w-8
+                shrink-0
+                rounded-lg
+                text-blue-400
+                hover:text-blue-700
+                hover:bg-blue-100
+                active:scale-95
+                transition-all
+              ">
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
 
-          <div className="px-3 pb-2">
+          {/* Textarea */}
+          <div className="px-3 sm:px-4 pb-2">
             <textarea
               ref={textareaRef}
               value={text}
               onChange={(e) => {
                 setText(e.target.value);
+
                 if (error) setError(null);
               }}
-              rows={3}
+              rows={4}
               maxLength={1000}
               placeholder="Tulis respon atau tindak lanjut untuk warga..."
-              className={`w-full text-xs rounded-lg border px-3 py-2 resize-none
-                         bg-white text-slate-700 placeholder:text-slate-400
-                         focus:outline-none focus:ring-2 transition-all
-                         ${
-                           error
-                             ? "border-red-300 focus:ring-red-200"
-                             : "border-blue-200 focus:ring-blue-200"
-                         }`}
+              className={`
+                w-full min-w-0
+                resize-none
+                rounded-xl
+                border
+                bg-white
+                px-3 py-2.5
+                text-[12px] sm:text-xs
+                leading-relaxed
+                text-slate-700
+                placeholder:text-slate-400
+                outline-none
+                transition-all
+                focus:ring-2
+
+                ${
+                  error
+                    ? "border-red-300 focus:ring-red-200"
+                    : "border-blue-200 focus:ring-blue-200"
+                }
+              `}
             />
-            <div className="flex items-center justify-between mt-1">
-              {error ? (
-                <p className="text-[10px] text-red-500 flex items-center gap-1">
-                  <span aria-hidden>⚠</span> {error}
-                </p>
-              ) : (
-                <span />
-              )}
+
+            {/* Footer info */}
+            <div
+              className="
+                mt-1.5
+                flex flex-col gap-1
+                sm:flex-row sm:items-center sm:justify-between
+              ">
+              <div className="min-h-[16px]">
+                {error && (
+                  <p
+                    className="
+                      flex items-start gap-1
+                      text-[10px]
+                      leading-relaxed
+                      text-red-500
+                      break-words
+                    ">
+                    <span aria-hidden>⚠</span>
+                    <span>{error}</span>
+                  </p>
+                )}
+              </div>
+
               <span
-                className={`text-[10px] ml-auto ${charLeft < 100 ? "text-amber-500" : "text-slate-400"}`}>
+                className={`
+                  text-[10px]
+                  sm:ml-auto
+                  ${charLeft < 100 ? "text-amber-500" : "text-slate-400"}
+                `}>
                 {charLeft} karakter tersisa
               </span>
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-2 px-3 pb-3">
+          {/* Actions */}
+          <div
+            className="
+              flex flex-col-reverse gap-2
+              border-t border-blue-100
+              px-3 sm:px-4
+              py-3
+
+              xs:flex-row
+              xs:items-center
+              xs:justify-end
+            ">
             <button
               type="button"
               onClick={handleClose}
-              className="px-3 py-1.5 text-xs font-semibold rounded-lg
-                         bg-white text-slate-600 border border-slate-200
-                         hover:bg-slate-50 transition-colors">
+              className="
+                w-full xs:w-auto
+                rounded-xl
+                border border-slate-200
+                bg-white
+                px-4 py-2
+                text-[11px] sm:text-xs
+                font-semibold
+                text-slate-600
+                hover:bg-slate-50
+                active:scale-[0.98]
+                transition-all
+              ">
               Batal
             </button>
+
             <button
               type="submit"
               disabled={isPending || !text.trim()}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold
-                         rounded-lg bg-blue-600 text-white hover:bg-blue-700
-                         disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-              <Send className="w-3 h-3" />
-              {isPending
-                ? "Menyimpan..."
-                : hasResponse
-                  ? "Perbarui Respon"
-                  : "Kirim Respon"}
+              className="
+                flex w-full xs:w-auto
+                items-center justify-center gap-1.5
+                rounded-xl
+                bg-blue-600
+                px-4 py-2
+                text-[11px] sm:text-xs
+                font-semibold
+                text-white
+                hover:bg-blue-700
+                disabled:cursor-not-allowed
+                disabled:opacity-50
+                active:scale-[0.98]
+                transition-all
+              ">
+              <Send className="w-3.5 h-3.5 shrink-0" />
+
+              <span className="truncate">
+                {isPending
+                  ? "Menyimpan..."
+                  : hasResponse
+                    ? "Perbarui Respon"
+                    : "Kirim Respon"}
+              </span>
             </button>
           </div>
         </form>

@@ -1,23 +1,28 @@
+// FormField.tsx
+
 import { cn } from "../../utils";
 
 interface FormFieldProps {
   id: string;
   label: string;
-  /** Icon yang tampil di sebelah label */
+
+  /** Icon di sebelah label */
   icon?: React.ElementType;
+
   error?: string;
-  /** Tandai field sebagai wajib diisi */
+
+  /** Field wajib */
   required?: boolean;
+
   children: React.ReactNode;
-  /** Elemen opsional di sebelah kanan label (misal: link "Lupa password?") */
+
+  /** Elemen kanan label */
   labelRight?: React.ReactNode;
 }
 
 /**
  * FormField
- * Wrapper label + children + pesan error.
- * Dipakai di LoginPage (email, password) dan RegisterPage
- * (semua field input).
+ * Fully responsive
  */
 export function FormField({
   id,
@@ -29,33 +34,100 @@ export function FormField({
   labelRight,
 }: FormFieldProps) {
   return (
-    <div>
-      {/* Label row */}
+    <div className="w-full min-w-0">
+      {/* Label Row */}
       <div
         className={cn(
-          "flex items-center mb-1.5",
-          labelRight ? "justify-between" : "",
-        )}>
+          `
+          mb-2
+          flex
+          items-center
+          gap-2
+          `,
+          labelRight ? "justify-between" : "justify-start",
+        )}
+      >
+        {/* Left Label */}
         <label
           htmlFor={id}
-          className="text-sm font-semibold text-slate-700 flex items-center gap-1.5">
-          {Icon && <Icon className="w-3.5 h-3.5 text-slate-500" />}
-          {label}
-          {required && <span className="text-red-500 ml-0.5">*</span>}
+          className="
+            min-w-0
+
+            flex
+            items-center
+            gap-1.5
+
+            text-sm
+            font-semibold
+            text-slate-700
+
+            break-words
+          "
+        >
+          {Icon && (
+            <Icon
+              className="
+                w-3.5
+                h-3.5
+                text-slate-500
+                shrink-0
+              "
+            />
+          )}
+
+          <span className="truncate">{label}</span>
+
+          {required && <span className="text-red-500 shrink-0">*</span>}
         </label>
-        {labelRight}
+
+        {/* Right Label */}
+        {labelRight && <div className="shrink-0">{labelRight}</div>}
       </div>
 
-      {/* Input slot */}
-      {children}
+      {/* Input */}
+      <div className="w-full min-w-0">{children}</div>
 
-      {/* Error message */}
+      {/* Error */}
       {error && (
-        <p className="mt-1.5 text-xs text-red-600 font-medium flex items-center gap-1">
-          <span className="w-3.5 h-3.5 rounded-full bg-red-100 flex items-center justify-center text-[10px] font-bold flex-shrink-0">
+        <p
+          className="
+            mt-2
+
+            flex
+            items-start
+            gap-2
+
+            text-xs
+            font-medium
+            text-red-600
+
+            leading-relaxed
+          "
+        >
+          <span
+            className="
+              mt-[1px]
+
+              w-4
+              h-4
+
+              rounded-full
+              bg-red-100
+
+              flex
+              items-center
+              justify-center
+
+              text-[10px]
+              font-bold
+
+              shrink-0
+            "
+          >
             !
           </span>
-          {error}
+
+          <span className="break-words">{error}</span>
         </p>
       )}
     </div>

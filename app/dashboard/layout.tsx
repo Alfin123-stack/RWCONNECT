@@ -14,11 +14,8 @@ export default async function DashboardLayout({
     data: { user: authUser },
   } = await supabase.auth.getUser();
 
-  if (!authUser) {
-    redirect("/login");
-  }
+  if (!authUser) redirect("/login");
 
-  // Fetch user profile
   const { data: profile } = await supabase
     .from("users")
     .select("*")
@@ -35,12 +32,13 @@ export default async function DashboardLayout({
   return (
     <div className="min-h-screen bg-slate-50 flex">
       <Sidebar user={user as User} />
-      <div className="flex-1 flex flex-col min-h-screen lg:ml-64">
+
+      <div className="flex-1 flex flex-col min-h-screen lg:ml-64 min-w-0">
         <TopBar user={user as User} />
-        <main className="flex-1 p-4 lg:p-6 xl:p-8 overflow-x-hidden">
+        <main className="flex-1 p-3 sm:p-4 lg:p-6 xl:p-8 overflow-x-hidden">
           {children}
         </main>
-        <footer className="px-6 py-4 border-t border-slate-100 bg-white">
+        <footer className="px-4 sm:px-6 py-3 sm:py-4 border-t border-slate-100 bg-white">
           <p className="text-xs text-slate-400 text-center">
             © 2024 RWConnect — Platform Informasi Warga Digital
           </p>

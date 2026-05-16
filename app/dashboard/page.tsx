@@ -12,12 +12,13 @@ export default async function DashboardPage() {
     await getDashboardData();
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-4 sm:space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-2xl lg:text-3xl font-display font-bold text-slate-900">
+        {/* Heading scales from text-xl on 320px up to text-3xl on lg */}
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-display font-bold text-slate-900">
           Dashboard
         </h1>
-        <p className="text-slate-500 mt-1 text-sm">
+        <p className="text-slate-500 mt-1 text-xs sm:text-sm">
           Selamat datang di RWConnect. Pantau informasi terkini di lingkungan
           kamu.
         </p>
@@ -26,7 +27,7 @@ export default async function DashboardPage() {
       <StatsGrid stats={stats} />
       <QuickActions />
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
         <div className="xl:col-span-2">
           <RecentAnnouncements announcements={recentAnnouncements} />
         </div>

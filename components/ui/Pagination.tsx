@@ -18,54 +18,215 @@ export function Pagination({
   basePath,
 }: PaginationProps) {
   const totalPages = Math.ceil(total / limit);
+
   if (totalPages <= 1) return null;
 
   const getHref = (page: number) => `${basePath}?page=${page}`;
 
+  /* =========================================
+   * SMART PAGINATION
+   * ========================================= */
+  const generatePages = () => {
+    const pages: (number | "...")[] = [];
+
+    // mobile friendly
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+
+      return pages;
+    }
+
+    // awal
+    if (current <= 3) {
+      pages.push(1, 2, 3, 4, "...", totalPages);
+    }
+
+    // tengah
+    else if (current < totalPages - 2) {
+      pages.push(
+        1,
+        "...",
+        current - 1,
+        current,
+        current + 1,
+        "...",
+        totalPages,
+      );
+    }
+
+    // akhir
+    else {
+      pages.push(
+        1,
+        "...",
+        totalPages - 3,
+        totalPages - 2,
+        totalPages - 1,
+        totalPages,
+      );
+    }
+
+    return pages;
+  };
+
+  const pages = generatePages();
+
+  const startData = Math.min((current - 1) * limit + 1, total);
+
+  const endData = Math.min(current * limit, total);
+
   return (
-    <div className="flex items-center justify-between py-2">
-      <p className="text-xs text-slate-500">
-        Menampilkan {Math.min((current - 1) * limit + 1, total)}–
-        {Math.min(current * limit, total)} dari {total} data
+    <div
+      className="
+        mt-4
+
+        flex flex-col gap-3
+        sm:flex-row sm:items-center sm:justify-between
+
+        rounded-2xl
+        border border-slate-100
+
+        bg-white
+
+        px-3 sm:px-4
+        py-3
+
+        shadow-sm
+      ">
+      {/* =====================================
+       * INFO
+       * ===================================== */}
+      <p
+        className="
+          text-center
+          text-[11px] sm:text-xs
+          leading-relaxed
+          text-slate-500
+
+          sm:text-left
+        ">
+        Menampilkan{" "}
+        <span className="font-semibold text-slate-700">{startData}</span>–
+        <span className="font-semibold text-slate-700">{endData}</span> dari{" "}
+        <span className="font-semibold text-slate-700">{total}</span> data
       </p>
-      <div className="flex items-center gap-1">
+
+      {/* =====================================
+       * PAGINATION
+       * ===================================== */}
+      <div
+        className="
+          flex items-center justify-center
+          gap-1
+
+          overflow-x-auto
+          scrollbar-hide
+        ">
+        {/* PREV */}
         <Link
-          href={getHref(current - 1)}
+          href={current > 1 ? getHref(current - 1) : "#"}
+          aria-disabled={current <= 1}
           className={cn(
-            "p-2 rounded-lg transition-colors",
+            `
+              flex h-9 w-9 shrink-0
+              items-center justify-center
+
+              rounded-xl
+
+              transition-all
+            `,
             current <= 1
-              ? "text-slate-300 pointer-events-none"
-              : "hover:bg-slate-100 text-slate-600",
-          )}
-          aria-disabled={current <= 1}>
-          <ChevronLeft className="w-4 h-4" />
+              ? "pointer-events-none text-slate-300"
+              : `
+                  text-slate-600
+                  hover:bg-slate-100
+                  active:scale-95
+                `,
+          )}>
+          <ChevronLeft className="h-4 w-4" />
         </Link>
-        {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-          const page = i + 1;
+
+        {/* PAGE ITEMS */}
+        {pages.map((page, index) => {
+          if (page === "...") {
+            return (
+              <span
+                key={`dots-${index}`}
+                className="
+                  flex h-9 min-w-[36px]
+                  items-center justify-center
+
+                  text-xs
+                  font-semibold
+                  text-slate-400
+                ">
+                ...
+              </span>
+            );
+          }
+
+          const active = current === page;
+
           return (
             <Link
               key={page}
               href={getHref(page)}
               className={cn(
-                "w-8 h-8 flex items-center justify-center rounded-lg text-xs font-semibold transition-all",
-                current === page
-                  ? "bg-blue-600 text-white shadow-sm"
-                  : "hover:bg-slate-100 text-slate-600",
+                `
+                  flex h-9 min-w-[36px]
+                  shrink-0
+                  items-center justify-center
+
+                  rounded-xl
+
+                  px-2
+
+                  text-[11px] sm:text-xs
+                  font-semibold
+
+                  transition-all
+                `,
+                active
+                  ? `
+                      bg-blue-600
+                      text-white
+                      shadow-sm
+                    `
+                  : `
+                      text-slate-600
+                      hover:bg-slate-100
+                      active:scale-95
+                    `,
               )}>
               {page}
             </Link>
           );
         })}
+
+        {/* NEXT */}
         <Link
-          href={getHref(current + 1)}
+          href={current < totalPages ? getHref(current + 1) : "#"}
+          aria-disabled={current >= totalPages}
           className={cn(
-            "p-2 rounded-lg transition-colors",
+            `
+              flex h-9 w-9 shrink-0
+              items-center justify-center
+
+              rounded-xl
+
+              transition-all
+            `,
             current >= totalPages
-              ? "text-slate-300 pointer-events-none"
-              : "hover:bg-slate-100 text-slate-600",
-          )}
-          aria-disabled={current >= totalPages}>
-          <ChevronRight className="w-4 h-4" />
+              ? "pointer-events-none text-slate-300"
+              : `
+                  text-slate-600
+                  hover:bg-slate-100
+                  active:scale-95
+                `,
+          )}>
+          <ChevronRight className="h-4 w-4" />
         </Link>
       </div>
     </div>

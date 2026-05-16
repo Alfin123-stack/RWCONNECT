@@ -1,33 +1,31 @@
+// AuthBrandPanel.tsx
+
 "use client";
 
 import { CheckCircle2 } from "lucide-react";
 import { cn } from "../../utils";
 
 // ── Types ─────────────────────────────────────────────────────
+
 interface Feature {
   icon: React.ElementType;
   label: string;
 }
 
 interface AuthBrandPanelProps {
-  /** Heading sebelum highlighted text */
   headingPrefix: string;
-  /** Teks yang diberi gradient highlight */
   headingHighlight: string;
-  /** Paragraf deskripsi di bawah heading */
   description: string;
-  /** Daftar fitur yang ditampilkan */
   features: Feature[];
-  /** Tampilkan centang (✓) di setiap feature — cocok untuk halaman register */
   showFeatureCheck?: boolean;
-  /** Label badge kecil di atas heading (opsional, contoh: "Daftar Gratis") */
   badge?: string;
-  /** Jumlah warga yang sudah bergabung */
   memberCount?: string;
 }
 
-// ── Avatar stack (statis, dekoratif) ─────────────────────────
+// ── Avatar Stack ──────────────────────────────────────────────
+
 const AVATAR_INITIALS = ["B", "S", "A", "R"] as const;
+
 const AVATAR_COLORS = [
   "bg-blue-500",
   "bg-cyan-500",
@@ -37,13 +35,25 @@ const AVATAR_COLORS = [
 
 function AvatarStack() {
   return (
-    <div className="flex -space-x-2">
+    <div className="flex -space-x-2 shrink-0">
       {AVATAR_INITIALS.map((initial, i) => (
         <div
           key={initial}
           className={cn(
-            "w-8 h-8 rounded-full border-2 border-slate-800",
-            "flex items-center justify-center text-xs font-bold text-white",
+            `
+            w-7 h-7
+            sm:w-8 sm:h-8
+            rounded-full
+            border-2
+            border-slate-800
+            flex
+            items-center
+            justify-center
+            text-[10px]
+            sm:text-xs
+            font-bold
+            text-white
+            `,
             AVATAR_COLORS[i],
           )}>
           {initial}
@@ -53,33 +63,114 @@ function AvatarStack() {
   );
 }
 
-// ── Background decorations ────────────────────────────────────
+// ── Background Decorations ───────────────────────────────────
+
 function PanelBackground() {
   return (
     <div className="absolute inset-0 overflow-hidden" aria-hidden>
-      {/* Blobs */}
-      <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-blue-600/20 blur-3xl" />
-      <div className="absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-cyan-500/20 blur-3xl" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full bg-blue-800/30 blur-2xl" />
+      {/* Blob 1 */}
+      <div
+        className="
+          absolute
+          -top-24
+          -left-24
+          w-72
+          h-72
+          sm:w-96
+          sm:h-96
+          rounded-full
+          bg-blue-600/20
+          blur-3xl
+        "
+      />
+
+      {/* Blob 2 */}
+      <div
+        className="
+          absolute
+          -bottom-24
+          -right-24
+          w-72
+          h-72
+          sm:w-96
+          sm:h-96
+          rounded-full
+          bg-cyan-500/20
+          blur-3xl
+        "
+      />
+
+      {/* Center Blob */}
+      <div
+        className="
+          absolute
+          top-1/2
+          left-1/2
+          -translate-x-1/2
+          -translate-y-1/2
+          w-52
+          h-52
+          sm:w-64
+          sm:h-64
+          rounded-full
+          bg-blue-800/30
+          blur-2xl
+        "
+      />
+
       {/* Grid */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:48px_48px]" />
+      <div
+        className="
+          absolute
+          inset-0
+          bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)]
+          bg-[size:48px_48px]
+        "
+      />
     </div>
   );
 }
 
-// ── Logo ──────────────────────────────────────────────────────
+// ── Logo ─────────────────────────────────────────────────────
+
 function BrandLogo() {
   return (
     <div className="flex items-center gap-3">
-      <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-blue-500/30">
+      <div
+        className="
+          w-10
+          h-10
+          rounded-2xl
+          bg-gradient-to-br
+          from-blue-500
+          to-cyan-400
+          flex
+          items-center
+          justify-center
+          shadow-lg
+          shadow-blue-500/30
+          shrink-0
+        ">
         <span className="text-white font-bold text-sm">RW</span>
       </div>
-      <span className="text-white font-display font-bold text-xl">Connect</span>
+
+      <span
+        className="
+          text-white
+          font-display
+          font-bold
+          text-lg
+          sm:text-xl
+          truncate
+        ">
+        Connect
+      </span>
     </div>
   );
 }
 
-// ── Main component ────────────────────────────────────────────
+// ── Main Component ───────────────────────────────────────────
+
 export function AuthBrandPanel({
   headingPrefix,
   headingHighlight,
@@ -90,66 +181,200 @@ export function AuthBrandPanel({
   memberCount = "200+ warga",
 }: AuthBrandPanelProps) {
   return (
-    <div className="hidden lg:flex flex-col justify-between p-12 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 relative overflow-hidden">
+    <div
+      className="
+        relative
+        overflow-hidden
+        bg-gradient-to-br
+        from-slate-900
+        via-blue-950
+        to-slate-900
+
+        flex
+        flex-col
+        justify-between
+
+        min-h-[320px]
+
+        px-4
+        py-6
+
+        sm:px-6
+        sm:py-8
+
+        md:px-8
+        md:py-10
+
+        lg:px-12
+        lg:py-12
+      ">
       <PanelBackground />
 
-      {/* ── Top section ─────────────────────────────────────── */}
+      {/* ── TOP ───────────────────────────────────────────── */}
       <div className="relative z-10">
-        <div className="mb-16">
+        {/* Logo */}
+        <div className="mb-8 sm:mb-10 lg:mb-16">
           <BrandLogo />
         </div>
 
         {/* Heading */}
-        <div className="mb-10">
+        <div className="mb-6 sm:mb-8 lg:mb-10">
           {badge && (
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/20 border border-blue-500/30 mb-4">
+            <div
+              className="
+                inline-flex
+                items-center
+                gap-2
+                px-3
+                py-1.5
+                rounded-full
+                bg-blue-500/20
+                border
+                border-blue-500/30
+                mb-4
+              ">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+
               <span className="text-blue-300 text-xs font-medium">{badge}</span>
             </div>
           )}
-          <h1 className="text-4xl xl:text-5xl font-display font-bold text-white leading-tight mb-4">
+
+          <h1
+            className="
+              text-2xl
+              sm:text-3xl
+              lg:text-4xl
+              xl:text-5xl
+              font-display
+              font-bold
+              text-white
+              leading-tight
+              break-words
+            ">
             {headingPrefix}{" "}
-            <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+            <span
+              className="
+                bg-gradient-to-r
+                from-blue-400
+                to-cyan-400
+                bg-clip-text
+                text-transparent
+              ">
               {headingHighlight}
             </span>
           </h1>
-          <p className="text-slate-400 text-lg leading-relaxed">
+
+          <p
+            className="
+              mt-4
+              text-sm
+              sm:text-base
+              lg:text-lg
+              text-slate-400
+              leading-relaxed
+              max-w-xl
+            ">
             {description}
           </p>
         </div>
 
-        {/* Feature list */}
+        {/* Feature List */}
         <div
           className={cn(
-            "grid gap-3",
-            showFeatureCheck ? "grid-cols-1" : "grid-cols-2",
+            `
+            grid
+            gap-3
+            `,
+            showFeatureCheck ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2",
           )}>
           {features.map((f, i) => (
             <div
               key={f.label}
-              className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm"
-              style={{ animationDelay: `${i * 80}ms` }}>
-              <div className="w-8 h-8 rounded-xl bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+              className="
+                flex
+                items-center
+                gap-3
+                rounded-2xl
+                bg-white/5
+                border
+                border-white/10
+                backdrop-blur-sm
+
+                px-3
+                py-3
+
+                sm:px-4
+              "
+              style={{
+                animationDelay: `${i * 80}ms`,
+              }}>
+              <div
+                className="
+                  w-8
+                  h-8
+                  rounded-xl
+                  bg-blue-500/20
+                  flex
+                  items-center
+                  justify-center
+                  shrink-0
+                ">
                 <f.icon className="w-4 h-4 text-blue-400" />
               </div>
-              <span className="text-slate-300 text-sm font-medium flex-1">
+
+              <span
+                className="
+                  text-slate-300
+                  text-sm
+                  font-medium
+                  flex-1
+                  break-words
+                ">
                 {f.label}
               </span>
+
               {showFeatureCheck && (
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
               )}
             </div>
           ))}
         </div>
       </div>
 
-      {/* ── Bottom member badge ──────────────────────────────── */}
-      <div className="relative mt-4 z-10">
-        <div className="flex mt-4 items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/10">
+      {/* ── Bottom Badge ─────────────────────────────────── */}
+      <div className="relative z-10 mt-6 sm:mt-8">
+        <div
+          className="
+            flex
+            items-center
+            gap-3
+            rounded-2xl
+            bg-white/5
+            border
+            border-white/10
+
+            px-4
+            py-4
+          ">
           <AvatarStack />
-          <div>
-            <p className="text-sm text-white font-semibold">{memberCount}</p>
-            <p className="text-xs text-slate-400">
+
+          <div className="min-w-0">
+            <p
+              className="
+                text-sm
+                font-semibold
+                text-white
+                truncate
+              ">
+              {memberCount}
+            </p>
+
+            <p
+              className="
+                text-xs
+                text-slate-400
+                break-words
+              ">
               sudah bergabung di RWConnect
             </p>
           </div>

@@ -22,7 +22,8 @@ export function StepIndicator({ steps, current }: StepIndicatorProps) {
     <div
       className="flex items-center gap-2 mb-8"
       role="list"
-      aria-label="Langkah pendaftaran">
+      aria-label="Langkah pendaftaran"
+    >
       {steps.map((step, i) => {
         const isDone = current > step.id;
         const isActive = current === step.id;
@@ -31,7 +32,8 @@ export function StepIndicator({ steps, current }: StepIndicatorProps) {
           <div
             key={step.id}
             className="flex items-center gap-2"
-            role="listitem">
+            role="listitem"
+          >
             {/* Step circle + label */}
             <div className="flex items-center gap-2">
               <div
@@ -43,7 +45,8 @@ export function StepIndicator({ steps, current }: StepIndicatorProps) {
                       ? "bg-blue-600 text-white shadow-md shadow-blue-200"
                       : "bg-slate-100 text-slate-400",
                 )}
-                aria-current={isActive ? "step" : undefined}>
+                aria-current={isActive ? "step" : undefined}
+              >
                 {isDone ? <CheckCircle2 className="w-4 h-4" /> : step.id}
               </div>
 
@@ -53,7 +56,8 @@ export function StepIndicator({ steps, current }: StepIndicatorProps) {
                   className={cn(
                     "text-xs font-semibold leading-none",
                     isActive ? "text-slate-900" : "text-slate-400",
-                  )}>
+                  )}
+                >
                   {step.title}
                 </p>
                 <p className="text-[10px] text-slate-400 mt-0.5">{step.desc}</p>

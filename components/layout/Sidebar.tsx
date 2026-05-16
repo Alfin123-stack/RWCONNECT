@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
 import {
   LayoutDashboard,
   Megaphone,
@@ -15,7 +14,6 @@ import {
   Users,
 } from "lucide-react";
 import { User } from "../../types";
-
 import { cn } from "../../utils";
 import { ROUTES } from "../../constants";
 
@@ -24,19 +22,10 @@ interface SidebarProps {
 }
 
 const navItems = [
-  {
-    href: ROUTES.DASHBOARD,
-    icon: LayoutDashboard,
-    label: "Dashboard",
-    exact: true,
-  },
+  { href: ROUTES.DASHBOARD, icon: LayoutDashboard, label: "Dashboard", exact: true },
   { href: ROUTES.ANNOUNCEMENTS, icon: Megaphone, label: "Pengumuman" },
   { href: ROUTES.CALENDAR, icon: Calendar, label: "Kalender Kegiatan" },
-  {
-    href: ROUTES.ASPIRATIONS,
-    icon: MessageSquarePlus,
-    label: "Aspirasi & Laporan",
-  },
+  { href: ROUTES.ASPIRATIONS, icon: MessageSquarePlus, label: "Aspirasi & Laporan" },
 ];
 
 const adminItems = [
@@ -57,24 +46,22 @@ export function Sidebar({ user }: SidebarProps) {
   const NavContent = () => (
     <div className="flex flex-col h-full">
       {/* Logo */}
-      <div className="px-6 py-5 border-b border-slate-100">
+      <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-slate-100">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center shadow-md shadow-blue-200 flex-shrink-0">
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center shadow-md shadow-blue-200 flex-shrink-0">
             <span className="text-white font-bold text-xs">RW</span>
           </div>
           <div>
-            <span className="font-display font-bold text-slate-900 text-lg leading-none">
+            <span className="font-display font-bold text-slate-900 text-base sm:text-lg leading-none">
               RWConnect
             </span>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Platform Warga Digital
-            </p>
+            <p className="text-xs text-slate-400 mt-0.5">Platform Warga Digital</p>
           </div>
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto scrollbar-thin">
+      <nav className="flex-1 px-2 sm:px-3 py-4 space-y-0.5 overflow-y-auto">
         <p className="px-3 mb-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
           Menu Utama
         </p>
@@ -84,14 +71,16 @@ export function Sidebar({ user }: SidebarProps) {
             href={item.href}
             onClick={() => setOpen(false)}
             className={cn(
+              "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 mt-1",
               isActive(item.href, item.exact)
-                ? "nav-item-active mt-2"
-                : "nav-item mt-2",
-            )}>
+                ? "bg-blue-600 text-white shadow-sm shadow-blue-200"
+                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            )}
+          >
             <item.icon className="w-4 h-4 flex-shrink-0" />
-            <span className="flex-1">{item.label}</span>
+            <span className="flex-1 truncate">{item.label}</span>
             {isActive(item.href, item.exact) && (
-              <ChevronRight className="w-3.5 h-3.5 opacity-60" />
+              <ChevronRight className="w-3.5 h-3.5 opacity-60 flex-shrink-0" />
             )}
           </Link>
         ))}
@@ -107,10 +96,14 @@ export function Sidebar({ user }: SidebarProps) {
                 href={item.href}
                 onClick={() => setOpen(false)}
                 className={cn(
-                  isActive(item.href) ? "nav-item-active" : "nav-item",
-                )}>
+                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
+                  isActive(item.href)
+                    ? "bg-blue-600 text-white shadow-sm shadow-blue-200"
+                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                )}
+              >
                 <item.icon className="w-4 h-4 flex-shrink-0" />
-                <span className="flex-1">{item.label}</span>
+                <span className="flex-1 truncate">{item.label}</span>
               </Link>
             ))}
           </>
@@ -122,30 +115,32 @@ export function Sidebar({ user }: SidebarProps) {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex flex-col fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-100 shadow-nav z-30">
+      <aside className="hidden lg:flex flex-col fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-100 shadow-sm z-30">
         <NavContent />
       </aside>
 
-      {/* Mobile Toggle */}
+      {/* Mobile FAB toggle */}
       <button
-        title="open sidebar"
+        title="Buka menu"
         onClick={() => setOpen(true)}
-        className="lg:hidden fixed bottom-6 right-6 z-40 w-12 h-12 rounded-2xl bg-blue-600 text-white shadow-xl shadow-blue-200 flex items-center justify-center">
+        className="lg:hidden fixed bottom-5 right-5 z-40 w-12 h-12 rounded-2xl bg-blue-600 text-white shadow-xl shadow-blue-300 flex items-center justify-center active:scale-95 transition-transform"
+      >
         <Menu className="w-5 h-5" />
       </button>
 
-      {/* Mobile Overlay */}
+      {/* Mobile overlay */}
       {open && (
         <>
           <div
             className="lg:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
             onClick={() => setOpen(false)}
           />
-          <aside className="lg:hidden fixed inset-y-0 left-0 w-72 bg-white z-50 shadow-2xl flex flex-col animate-slide-in">
+          <aside className="lg:hidden fixed inset-y-0 left-0 w-[280px] sm:w-72 bg-white z-50 shadow-2xl flex flex-col animate-slide-in">
             <button
-              title="close sidebar"
+              title="Tutup menu"
               onClick={() => setOpen(false)}
-              className="absolute top-4 right-4 p-2 rounded-lg hover:bg-slate-100 transition-colors">
+              className="absolute top-3 right-3 p-2 rounded-lg hover:bg-slate-100 transition-colors"
+            >
               <X className="w-4 h-4 text-slate-500" />
             </button>
             <NavContent />

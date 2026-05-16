@@ -1,18 +1,26 @@
 "use client";
 
 import { useState } from "react";
+
 import { MessageCircle } from "lucide-react";
+
 import { useToast } from "../../hooks/useToast";
+
 import {
   upvoteAspiration,
   unvoteAspiration,
   updateAspirationStatus,
   deleteAspiration,
 } from "../../actions/aspirations";
+
 import { getStatusLabel } from "../../utils";
+
 import { Pagination } from "../../components/ui/Pagination";
+
 import { useAspirations } from "../../contexts/AspirationContext";
+
 import { AspirationCard } from "./AspirationCard";
+
 import type { AspirationStatus } from "../../types";
 
 interface AspirationListProps {
@@ -30,6 +38,7 @@ export function AspirationList({
   isAdmin,
 }: AspirationListProps) {
   const { showToast } = useToast();
+
   const {
     items,
     isStatusPending,
@@ -49,6 +58,7 @@ export function AspirationList({
 
   const handleToggleVote = (id: string) => {
     const alreadyVoted = hasVoted(id);
+
     const asp = items.find((a) => a.id === id);
 
     if (alreadyVoted) {
@@ -62,9 +72,12 @@ export function AspirationList({
     startUpvoteTransition(async () => {
       if (alreadyVoted) {
         const result = await unvoteAspiration(id, asp?.upvote_count ?? 0);
+
         if (!result.success) {
           optimisticUpvote(id);
+
           markVoted(id);
+
           showToast(
             "error",
             "Gagal",
@@ -73,9 +86,12 @@ export function AspirationList({
         }
       } else {
         const result = await upvoteAspiration(id, asp?.upvote_count ?? 0);
+
         if (!result.success) {
           optimisticUnvote(id);
+
           markUnvoted(id);
+
           showToast(
             "error",
             "Gagal",
@@ -89,11 +105,15 @@ export function AspirationList({
   const handleStatusChange = (id: string, status: AspirationStatus) => {
     startStatusTransition(async () => {
       optimisticUpdateStatus(id, status);
+
       const result = await updateAspirationStatus(id, status);
+
       if (!result.success) {
         showToast("error", "Gagal", "Tidak bisa mengubah status saat ini.");
+
         return;
       }
+
       showToast(
         "success",
         "Status diperbarui",
@@ -104,9 +124,12 @@ export function AspirationList({
 
   const handleDelete = (id: string) => {
     setConfirmId(null);
+
     startDeleteTransition(async () => {
       optimisticDelete(id);
+
       const result = await deleteAspiration(id);
+
       if (!result.success) {
         showToast("error", "Gagal", "Tidak bisa menghapus aspirasi saat ini.");
       } else {
@@ -115,14 +138,52 @@ export function AspirationList({
     });
   };
 
+  /* Empty state */
   if (items.length === 0) {
     return (
-      <div className="card py-16 text-center">
-        <div className="flex justify-center mb-3">
-          <MessageCircle className="w-10 h-10 text-slate-300" />
+      <div
+        className="
+          card
+
+          py-12 sm:py-16
+          px-4 sm:px-6
+
+          text-center
+
+          rounded-2xl
+        ">
+        <div
+          className="
+            flex justify-center
+            mb-3
+          ">
+          <MessageCircle
+            className="
+              w-9 h-9 sm:w-10 sm:h-10
+              text-slate-300
+            "
+          />
         </div>
-        <p className="font-semibold text-slate-700 mb-1">Belum ada aspirasi</p>
-        <p className="text-sm text-slate-400">
+
+        <p
+          className="
+            font-semibold
+            text-slate-700
+
+            text-sm sm:text-base
+
+            mb-1
+          ">
+          Belum ada aspirasi
+        </p>
+
+        <p
+          className="
+            text-xs sm:text-sm
+            text-slate-400
+            leading-relaxed
+            break-words
+          ">
           Jadilah yang pertama menyampaikan aspirasi!
         </p>
       </div>
@@ -130,7 +191,12 @@ export function AspirationList({
   }
 
   return (
-    <div className="space-y-4">
+    <div
+      className="
+        space-y-4
+        w-full
+      ">
+      {/* Cards */}
       {items.map((asp, i) => (
         <AspirationCard
           key={asp.id}
@@ -148,12 +214,19 @@ export function AspirationList({
         />
       ))}
 
-      <Pagination
-        current={page}
-        total={total}
-        limit={limit}
-        basePath="/dashboard/aspirations"
-      />
+      {/* Pagination */}
+      <div
+        className="
+          pt-2
+          overflow-x-auto
+        ">
+        <Pagination
+          current={page}
+          total={total}
+          limit={limit}
+          basePath="/dashboard/aspirations"
+        />
+      </div>
     </div>
   );
 }
