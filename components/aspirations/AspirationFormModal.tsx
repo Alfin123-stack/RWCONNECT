@@ -613,7 +613,7 @@ export function AspirationFormModal() {
                         className={`
                           h-full rounded-full
                           transition-all duration-300
-
+                          w-[${contentPct}%]
                           ${
                             contentPct > 90
                               ? "bg-red-400"
@@ -622,9 +622,6 @@ export function AspirationFormModal() {
                                 : "bg-blue-400"
                           }
                         `}
-                        style={{
-                          width: `${contentPct}%`,
-                        }}
                       />
                     </div>
 

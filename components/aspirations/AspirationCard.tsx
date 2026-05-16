@@ -114,7 +114,6 @@ export function AspirationCard({
       className={cn(
         `
           overflow-hidden
-
           rounded-3xl
           border border-slate-100
 
@@ -129,10 +128,7 @@ export function AspirationCard({
           hover:shadow-lg
         `,
         isOptimistic ? "pointer-events-none opacity-60" : "opacity-100",
-      )}
-      style={{
-        animationDelay: `${index * 50}ms`,
-      }}>
+      )}>
       {/* =====================================
        * WRAPPER
        * ===================================== */}
