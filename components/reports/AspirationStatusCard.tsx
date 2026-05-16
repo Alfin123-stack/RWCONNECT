@@ -82,10 +82,8 @@ export function AspirationStatusCard({ items }: AspirationStatusCardProps) {
                   rounded-full
                   ${item.color}
                   transition-all duration-700
+                  w=[${item.pct}%]
                 `}
-                style={{
-                  width: `${item.pct}%`,
-                }}
               />
             </div>
 

@@ -93,10 +93,7 @@ export function ReportsStats({ stats }: { stats: Stat[] }) {
               transition-all duration-300
               hover:-translate-y-0.5
               min-w-0
-            "
-            style={{
-              animationDelay: `${i * 60}ms`,
-            }}>
+            ">
             {/* Top */}
             <div
               className="
