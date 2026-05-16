@@ -28,9 +28,6 @@ import { ASPIRATION_CATEGORIES } from "../../constants";
 
 import { cn } from "../../utils";
 
-/* ─────────────────────────────────────────────
- * ICONS
- * ───────────────────────────────────────────── */
 const ASPIRATION_CATEGORY_ICONS: Record<string, LucideIcon> = {
   infrastruktur: Construction,
   keamanan: Lock,
@@ -72,9 +69,6 @@ const ASPIRATION_STATUSES: {
   },
 ];
 
-/* ─────────────────────────────────────────────
- * TYPES
- * ───────────────────────────────────────────── */
 interface AspirationFiltersProps {
   currentFilters: {
     category?: AspirationCategory;
@@ -83,9 +77,6 @@ interface AspirationFiltersProps {
   };
 }
 
-/* ─────────────────────────────────────────────
- * COMPONENT
- * ───────────────────────────────────────────── */
 export function AspirationFilters({ currentFilters }: AspirationFiltersProps) {
   const router = useRouter();
 
@@ -134,9 +125,6 @@ export function AspirationFilters({ currentFilters }: AspirationFiltersProps) {
     [searchParams, pathname, router],
   );
 
-  /* ─────────────────────────────────────────
-   * SEARCH
-   * ───────────────────────────────────────── */
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const val = e.target.value;
@@ -179,9 +167,6 @@ export function AspirationFilters({ currentFilters }: AspirationFiltersProps) {
     !!currentFilters.status ||
     !!currentFilters.search;
 
-  /* ─────────────────────────────────────────
-   * CLEAR
-   * ───────────────────────────────────────── */
   const clearAll = () => {
     if (inputRef.current) {
       inputRef.current.value = "";
@@ -199,18 +184,7 @@ export function AspirationFilters({ currentFilters }: AspirationFiltersProps) {
   return (
     <div
       className="
-        overflow-hidden
-
-        rounded-3xl
-        border border-slate-100
-
-        bg-white
-
-        p-3 sm:p-4 lg:p-5
-
-        shadow-sm
-
-        space-y-4
+        overflow-hidden rounded-3xl border border-slate-100 bg-white p-3 sm:p-4 lg:p-5 shadow-sm space-y-4
       ">
       {/* =====================================
        * SEARCH
@@ -219,14 +193,7 @@ export function AspirationFilters({ currentFilters }: AspirationFiltersProps) {
         <Search
           className={cn(
             `
-              pointer-events-none
-
-              absolute left-3 top-1/2
-              -translate-y-1/2
-
-              h-4 w-4
-
-              transition-colors
+              pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors
             `,
             isPending ? "animate-pulse text-blue-400" : "text-slate-400",
           )}
@@ -239,29 +206,8 @@ export function AspirationFilters({ currentFilters }: AspirationFiltersProps) {
           defaultValue={currentFilters.search ?? ""}
           onChange={handleSearchChange}
           className="
-            h-11 sm:h-12
-            w-full
-
-            rounded-2xl
-            border border-slate-200
-
-            bg-white
-
-            pl-10
-            pr-10
-
-            text-sm
-            text-slate-800
-
-            placeholder:text-slate-400
-
-            outline-none
-
-            transition-all
-
-            focus:border-blue-400
-            focus:ring-2
-            focus:ring-blue-300
+            h-11 sm:h-12 w-full rounded-2xl
+            border border-slate-200 bg-white pl-10 pr-10 text-sm text-slate-800 placeholder:text-slate-400 outline-none transition-all focus:border-blue-400 focus:ring-2 focus:ring-blue-300
           "
         />
 
@@ -361,7 +307,7 @@ export function AspirationFilters({ currentFilters }: AspirationFiltersProps) {
           </p>
 
           <select
-          t
+            title="Filter berdasarkan kategori"
             value={currentFilters.category ?? ""}
             onChange={(e) => updateFilter("category", e.target.value)}
             className="
